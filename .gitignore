@@ -1,0 +1,34 @@
+# Dependency directories
+**/node_modules/
+**/.pnpm-store/
+
+# Python virtual environments
+**/.venv/
+**/venv/
+
+# Build outputs
+**/build/
+**/dist/
+**/out/
+**/.next/
+**/.wrangler/
+
+# Android / Gradle build artifacts
+**/.gradle/
+**/android/.gradle/
+**/android/app/build/
+**/android/build/
+
+# Logs
+**/*.log
+**/npm-debug.log*
+**/pnpm-debug.log*
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+
+# Exceed GitHub 100MB single-file limit (keep in working tree, not in git)
+**/RootRecordBusinessManager.exe
+**/RootRecordWeatherManager.exe
+**/weather-manager.db

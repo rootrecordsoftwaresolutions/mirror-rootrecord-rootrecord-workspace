@@ -1,0 +1,4 @@
+{
+  "schema": 1,
+  "purpose": "Marks the RootRecord Windows app development workspace root so shared tooling can find .env and scripts."
+}

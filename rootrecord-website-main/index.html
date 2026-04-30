@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RootRecord &mdash; Multi-Device Solutions</title>
+  <meta name="description" content="RootRecord delivers multi-device software for operations, time, money, and weather awareness &mdash; practical tools for the way you work.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..600,30..100;1,9..144,300..600,30..100&family=Geist:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#081C2B">
+  <link rel="canonical" href="https://rootrecord.info/">
+  <!-- Open Graph / social -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="RootRecord">
+  <meta property="og:title" content="RootRecord &mdash; Multi-Device Solutions">
+  <meta property="og:description" content="RootRecord delivers multi-device software for operations, time, money, and weather awareness &mdash; practical tools for the way you work.">
+  <meta property="og:url" content="https://rootrecord.info/">
+  <meta property="og:image" content="https://rootrecord.info/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@RootRecord">
+  <meta name="twitter:title" content="RootRecord &mdash; Multi-Device Solutions">
+  <meta name="twitter:description" content="RootRecord delivers multi-device software for operations, time, money, and weather awareness &mdash; practical tools for the way you work.">
+  <meta name="twitter:image" content="https://rootrecord.info/assets/og.jpg">
+  <link rel="stylesheet" href="/styles.css?v=8">
+</head>
+<body>
+  <div class="site">
+    <header class="site-header">
+      <div class="container site-header-inner">
+        <a class="brand" href="/" data-testid="brand-home-link">
+          <img class="brand-mark" src="/favicon-180.png" alt="RootRecord logo" width="32" height="32">
+          RootRecord
+        </a>
+        <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" data-testid="nav-toggle-btn" onclick="document.querySelector('.site-nav').classList.toggle('is-open');this.setAttribute('aria-expanded', this.getAttribute('aria-expanded')==='true'?'false':'true');">
+          Menu
+        </button>
+        <nav class="site-nav" data-testid="primary-nav">
+          <a href="/" aria-current="page">Home</a>
+          <a href="/products.html">Products</a>
+          <a href="/pricing.html">Pricing</a>
+          <a href="/about.html">About</a>
+          <a href="/faq.html">FAQ</a>
+          <a href="/contact.html">Contact</a>
+          <span class="nav-auth-guest">
+            <a href="/account-signup.html" class="nav-signup" data-testid="nav-signup-cta">Sign up</a>
+            <a href="/account.html" class="nav-cta" data-testid="nav-account-login">Account</a>
+          </span>
+          <span class="nav-auth-user">
+            <span class="nav-account-wrap">
+              <button type="button" class="nav-cta nav-account-trigger" aria-expanded="false" aria-haspopup="true" aria-controls="nav-account-panel" data-testid="nav-account-cta">Account</button>
+              <div id="nav-account-panel" class="nav-account-panel" role="menu" hidden>
+                <a href="/account.html" role="menuitem">Account</a>
+                <a href="/my-apps.html" role="menuitem">My Apps</a>
+                <a href="/development-notice.html" role="menuitem">Development notice</a>
+                <a href="/billing.html" role="menuitem">Billing</a>
+                <a href="/beta-tester-rewards.html" role="menuitem">Beta tester rewards</a>
+              </div>
+            </span>
+          </span>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main">
+      <!-- HERO -->
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="fade-up">
+            <span class="eyebrow">Multi-Device Solutions</span>
+            <h1 class="hero-title">Software that respects your <em>data</em>, your <em>time</em>, and your <em>work</em>.</h1>
+            <p class="hero-lead">RootRecord builds apps for the devices you actually use &mdash; from the shop PC to the phone in your pocket. Subscription, sync, and backup are there when you want them.</p>
+            <div class="hero-ctas">
+              <a class="btn btn-primary btn-arrow" href="/products.html" data-testid="hero-primary-cta">Explore products</a>
+              <a class="btn btn-secondary" href="/pricing.html" data-testid="hero-secondary-cta">See pricing</a>
+            </div>
+            <div class="hero-meta">
+              <span class="hero-meta-item">PC &amp; mobile apps</span>
+              <span class="hero-meta-item">Built for real operations</span>
+              <span class="hero-meta-item">Weather &middot; multi-device</span>
+              <span class="hero-meta-item">Lifetime plan available</span>
+            </div>
+          </div>
+
+          <div class="fade-up delay-2" aria-hidden="true">
+            <div class="hero-visual">
+              <img src="/assets/hero-dashboard.jpg" alt="RootRecord Business Manager dashboard &mdash; revenue, hours, and category charts" loading="eager">
+              <div class="hero-badge tl">
+                <div class="hero-badge-icon"><span aria-hidden="true">&#9679;</span></div>
+                <div>
+                  <strong>Your workflow</strong>
+                  <span>Apps on the devices you use</span>
+                </div>
+              </div>
+              <div class="hero-badge br cyan">
+                <div class="hero-badge-icon"><span aria-hidden="true">&#9679;</span></div>
+                <div>
+                  <strong>Online when you need it</strong>
+                  <span>Sync and backup on your terms</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRERELEASE + NEWSLETTER (account) -->
+      <section class="container home-prerelease" aria-labelledby="home-prerelease-heading">
+        <div class="cta-band home-prerelease-band" data-testid="home-prerelease-banner">
+          <p class="home-prerelease-kicker">Prerelease &amp; product email</p>
+          <h2 class="cta-band-title" id="home-prerelease-heading">Create an account for <em>prerelease</em> and <em>newsletter</em> emails</h2>
+          <p class="cta-band-lead">Hear about early builds, release notes, and what we ship next &mdash; all sent to the address on your RootRecord account.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary btn-arrow" href="/account-signup.html" data-testid="home-prerelease-create">Create an account</a>
+            <a class="btn btn-secondary" href="/account.html" data-testid="home-prerelease-signin">Sign in</a>
+          </div>
+          <p class="home-prerelease-foot">We keep mail useful and infrequent. <a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></p>
+        </div>
+      </section>
+
+      <!-- PRINCIPLES STRIP -->
+      <section class="container">
+        <div class="principles">
+          <div class="principle">
+            <div class="principle-num">01 / Your data</div>
+            <h3>Your data, your devices</h3>
+            <p>Operational data lives where you run the app unless you move it or turn on sync and online features.</p>
+          </div>
+          <div class="principle">
+            <div class="principle-num">02 / Clear books</div>
+            <h3>Totals you can defend</h3>
+            <p>Overlapping clock intervals merge for unique coverage &mdash; no double-counted minutes in reports and exports.</p>
+          </div>
+          <div class="principle">
+            <div class="principle-num">03 / Online services</div>
+            <h3>Sync when you want it</h3>
+            <p>Subscription, sync, and secure online backup are available when you want them &mdash; use as much or as little as fits your workflow.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FEATURES -->
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <div class="section-kicker">What we build</div>
+            <h2 class="section-title">Practical tools, <em>carefully made</em>.</h2>
+            <p class="section-lead">Business Manager on Windows today; Weather Manager on Windows and Android. Each solves a real problem end-to-end &mdash; clear, capable software without the usual SaaS sprawl.</p>
+          </div>
+
+          <ul class="products-grid" data-testid="home-products-list">
+            <li>
+              <a class="product-card" href="/rootrecord-business-manager.html" data-testid="product-card-business">
+                <span class="product-card-tag">For operators &middot; Windows</span>
+                <h3 class="product-card-title">RootRecord Business Manager</h3>
+                <p class="product-card-desc">Time, money, clients, inventory, scheduling, work log, and reports in one workspace on your PC.</p>
+                <span class="product-card-cta">View product page</span>
+              </a>
+            </li>
+            <li>
+              <a class="product-card" href="/rootrecord-weather-manager.html" data-testid="product-card-weather">
+                <span class="product-card-tag">For awareness &middot; Multi-device</span>
+                <h3 class="product-card-title">Root Record Weather Manager</h3>
+                <p class="product-card-desc">Weather, alerts, earthquakes, and hazard context for the places you care about &mdash; on the devices you carry and the screens at your desk, without juggling browser tabs.</p>
+                <span class="product-card-cta">View product page</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- WHY / FEATURE GRID -->
+      <section class="section" style="padding-top:0">
+        <div class="container">
+          <div class="section-header">
+            <div class="section-kicker">Principles in practice</div>
+            <h2 class="section-title">Why people choose <em>RootRecord</em>.</h2>
+          </div>
+          <div class="features">
+            <div class="feature">
+              <div class="feature-icon"><span aria-hidden="true">&#9679;</span></div>
+              <h3>On your devices</h3>
+              <p>Your primary business database is a file where you run Business Manager. Back it up like any other important file &mdash; or let the app run scheduled backups.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><span aria-hidden="true">&#9679;</span></div>
+              <h3>Works in the real world</h3>
+              <p>Day-to-day work is not blocked when the network is spotty. Sign-in, sync, and cloud backup layer on when you enable them.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><span aria-hidden="true">&#9679;</span></div>
+              <h3>Honest totals</h3>
+              <p>Hours worked, categories, exports &mdash; numbers reconcile by design. No surprises when it's time for reports and invoices.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><span aria-hidden="true">&#9679;</span></div>
+              <h3>Subscription &amp; online</h3>
+              <p>Subscription, sync, and secure online backup when you want them. One account across RootRecord apps where supported.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><span aria-hidden="true">&#9679;</span></div>
+              <h3>Regular updates</h3>
+              <p>Installers and APKs ship on GitHub Releases per product. Each build is noted so you always know what's running.</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon"><span aria-hidden="true">&#9679;</span></div>
+              <h3>Lifetime option</h3>
+              <p>One payment for ongoing access to current and future RootRecord programs &mdash; so the tool grows with your work.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA BAND -->
+      <section class="container">
+        <div class="cta-band">
+          <h2 class="cta-band-title">Start with the <em>program</em> that matches your work.</h2>
+          <p class="cta-band-lead">Browse products, review pricing, or jump straight to your account to manage a subscription. Questions? The FAQ has straight answers.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary btn-arrow" href="/products.html" data-testid="cta-band-products">View products</a>
+            <a class="btn btn-secondary" href="/pricing.html" data-testid="cta-band-pricing">See pricing</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a class="brand" href="/"><img class="brand-mark" src="/favicon-180.png" alt="RootRecord logo" width="32" height="32">RootRecord</a>
+            <p>Multi-device solutions - your grounding roots for productivity.</p>
+          </div>
+          <div class="footer-col">
+            <h4>Products</h4>
+            <ul>
+              <li><a href="/rootrecord-business-manager.html">Business Manager</a></li>
+              <li><a href="/rootrecord-weather-manager.html">Weather Manager</a></li>
+              <li><a href="/products.html">All products</a></li>
+              <li><a href="/pricing.html">Pricing</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Company</h4>
+            <ul>
+              <li><a href="/about.html">About</a></li>
+              <li><a href="/faq.html">FAQ</a></li>
+              <li><a href="/contact.html">Contact</a></li>
+              <li><a href="/account-signup.html">Create account</a></li>
+              <li><a href="/billing.html">Billing</a></li>
+              <li><a href="/account.html">Account</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Community</h4>
+            <ul>
+              <li><a href="https://discord.gg/CPaDYuFkU" target="_blank" rel="noopener">Discord</a></li>
+              <li><a href="https://x.com/RootRecord" target="_blank" rel="noopener">X (Twitter)</a></li>
+              <li><a href="/terms.html">Terms</a></li>
+              <li><a href="/privacy.html">Privacy</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>&copy; <span id="yr">2026</span> RootRecord &middot; <a href="https://rootrecord.info/">rootrecord.info</a></span>
+          <span>Multi-Device Solutions.</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+  <script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+  <script src="/site-nav.js?v=2" defer></script>
+</body>
+</html>

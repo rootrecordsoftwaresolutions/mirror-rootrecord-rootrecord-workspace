@@ -1,0 +1,14 @@
+{
+  "access_token": "A0rInbIztyNEAOB0rTCKq67ZvZoNK_yuZW6kpF9dipA",
+  "email": "storeyalexander94@gmail.com",
+  "account_id": "5283c6b6-ef18-43d5-a616-dfcb189d13ea",
+  "me": {
+    "account_id": "5283c6b6-ef18-43d5-a616-dfcb189d13ea",
+    "email": "storeyalexander94@gmail.com",
+    "subscription_status": "active",
+    "trial_started_at": "2026-04-12T07:40:16.761Z",
+    "trial_ends_at": "2026-04-26T07:40:16.761Z",
+    "has_password": true
+  },
+  "last_entitlement_check_utc": "2026-04-25T00:15:02.311Z"
+}

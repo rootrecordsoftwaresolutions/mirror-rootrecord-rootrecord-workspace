@@ -1,0 +1,4 @@
+owner: RootRecord
+repo: rootrecord-weather-manager-download
+provider: github
+updaterCacheDirName: root-record-weather-manager-updater

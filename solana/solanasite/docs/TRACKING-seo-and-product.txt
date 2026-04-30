@@ -1,0 +1,195 @@
+================================================================================
+ROOTRECORD SOLANA TOOLS — PRODUCT + SEO TRACKING
+Last updated: 2026-04-26
+================================================================================
+
+ENGINEERING NOTES (Metaplex)
+----------------------------
+• @metaplex-foundation/mpl-token-metadata 2.13.0 exports web3.js helpers:
+  createCreateMetadataAccountV3Instruction, createUpdateMetadataAccountV2Instruction,
+  PROGRAM_ID — this matches lib/solana.ts.
+• Version 3.x of the same package is UMI-first (createMetadataAccountV3 returns a
+  UMI TransactionBuilder; no drop-in web3 instruction with the old names). Upgrading
+  to v3 would mean adding @metaplex-foundation/umi and rewriting the legacy path,
+  or hand-serializing instructions. Decision: PIN 2.13.0 for the legacy Metaplex flow.
+• Production build: 10 static routes + 3 dynamic API routes (/api/pin/*).
+
+ENV (copy .env.example → .env.local)
+------------------------------------
+• NEXT_PUBLIC_FEE_WALLET — real base58 pubkey (placeholders skip the fee ix).
+• NEXT_PUBLIC_RPC_URL — dedicated RPC for devnet/mainnet.
+• PINATA_JWT — server-only for /api/pin/file, /api/pin/json, /api/pin/status.
+
+RECENT CODE CHANGES (this pass)
+-------------------------------
+• Fee wallet: shared isFeeWalletConfigured() + placeholder set including
+  YourActualFeeWalletPubkeyHere.
+• ToolDialog: reset form when tool changes; debounced readMintInfo() preview for
+  Token-2022 fee tools (program, decimals, fee bps, withheld).
+• SuccessDialog: optional copy for two-tx Token-2022 creates.
+• package.json overrides: @types/react 18.3.12 / @types/react-dom 18.3.1 (fixes
+  wallet-adapter FC vs JSX typing with current Next).
+
+NICE-TO-HAVES (backlog)
+-----------------------
+• /dashboard?mint=… control panel (program, supply, authorities, extensions,
+  withheld fees) using readMintInfo + on-chain reads.
+• Server-side referral attribution (?ref= cookie + fee transfers → weekly cron).
+• Per-route generateMetadata where still using layout defaults only.
+
+================================================================================
+SEO — EXECUTIVE SUMMARY (5 bullets)
+================================================================================
+1. POSITIONING: RootRecord Solana Tools is a developer- and creator-facing utility
+   for SPL and Token-2022 tokens (create, authorities, metadata, transfer-fee ops)
+   with transparent flat SOL pricing — not a trading platform or investment product.
+2. TOP OPPORTUNITIES: Own “SPL token creator Solana”, “Token-2022 transfer fee”,
+   “revoke mint authority”, “Metaplex metadata update”, and “cheap token launch”
+   with accurate, non-hype copy and schema (SoftwareApplication / FAQPage).
+3. RISKS — CANNIBALIZATION: /create vs home both target “token creator”; differentiate
+   home = brand + overview; /create = primary intent + form (avoid duplicate H1s).
+4. RISKS — THIN PAGES: /terms and /privacy are necessary but low unique value;
+   keep indexable but minimal keyword targeting; no keyword stuffing.
+5. ACCURACY: Do not claim integrations (Helius, Jupiter, etc.) unless contractually
+   true; describe “your RPC URL” and “IPFS via Pinata” only as user-configured.
+
+================================================================================
+SEO — SITE-WIDE KEYWORD MAP (primary + secondary per major page)
+================================================================================
+/ (home)
+  Primary: Solana token tools (utility suite positioning)
+  Secondary: SPL token launch, revoke mint authority, Token-2022, flat fee pricing
+
+/create
+  Primary: Create SPL token on Solana
+  Secondary: Metaplex metadata, IPFS token metadata, Token-2022 extensions,
+             wallet signing, one-transaction legacy flow
+
+/tools
+  Primary: Solana token management tools
+  Secondary: revoke freeze authority, mint more tokens, update Metaplex metadata,
+             Token-2022 transfer fee withdraw harvest
+
+/pricing
+  Primary: Solana token creator pricing
+  Secondary: transparent SOL fees, compare on-chain cost vs platform fee
+
+/docs
+  Primary: RootRecord Solana tools documentation
+  Secondary: Pinata IPFS, Token-2022 extensions, RPC configuration
+
+/privacy, /terms
+  Primary: privacy policy / terms of service (brand + product name only)
+
+================================================================================
+SEO — TABLE (URL | current title | proposed title | proposed meta | primary kw)
+================================================================================
+Note: “current title” = resolved Next metadata title (template: "%s | RootRecord
+Solana Tools" where a short title is set).
+
+/                    | (layout default) | Solana SPL & Token-2022 tools — create & manage tokens | Low-fee Solana token creator: SPL mint, Metaplex metadata, Token-2022 extensions. Open tools to create or manage. | Solana token tools
+/create              | (layout default) | Create SPL or Token-2022 token on Solana | Launch a mint with Metaplex metadata or Token-2022 in-mint metadata. IPFS upload optional. Connect wallet to sign. | Create SPL token Solana
+/tools               | (layout default) | Token tools: revoke authority, metadata, Token-2022 fees | Revoke mint/freeze, mint more, update legacy metadata, withdraw or harvest Token-2022 transfer fees. | Solana token tools
+/pricing             | Pricing          | Solana token tool pricing (flat SOL) | Per-action SOL fees vs typical competitors. No subscriptions. See what each create and tool action costs. | Solana token creator pricing
+/docs                | Docs             | Docs: wallet, create flow, Token-2022, Pinata | How to connect a wallet, create tokens, use Token-2022 extensions, IPFS metadata, and fee tools. | Solana tools documentation
+/privacy             | Privacy          | Privacy — RootRecord Solana Tools | What we collect: wallet public keys for transactions, optional IPFS uploads via Pinata. No financial advice. | Privacy policy
+/terms               | Terms            | Terms — RootRecord Solana Tools | Rules of use for the token creation and management utilities. | Terms of service
+/api/pin/*           | (n/a)            | (noindex if exposed) | Server routes for IPFS pinning — not for end-user SEO. | —
+
+================================================================================
+SEO — ON-PAGE DETAIL (key URLs)
+================================================================================
+
+— HOME /
+Title (≤60): Solana SPL & Token-2022 tools — RootRecord
+Meta (≤155): Create SPL tokens, optional Token-2022 extensions, revoke authorities,
+  and manage transfer fees. Flat SOL pricing. Connect your wallet to start.
+H1 (suggested): Keep emotional brand H1 OR add sr-only / supporting H1 for SEO —
+  decide in implementation (one visible H1 preferred).
+H2 outline: How it works · SPL vs Token-2022 · Pricing snapshot · Trust signals
+Internal links: Create token → /create · Tools → /tools · Pricing → /pricing · Docs → /docs
+FAQ (example):
+  Q: Does this work on devnet?
+  A: Yes. Set NEXT_PUBLIC_SOLANA_NETWORK=devnet and a devnet RPC in .env.local.
+  Q: Is Token-2022 the same as “spl token 2022”?
+  A: Token-2022 is the SPL Token program extension model; we expose optional extensions
+     on /create when you enable Token-2022 mode.
+  Q: Do you custody my tokens?
+  A: No. Transactions are signed in your wallet; we build standard Solana instructions.
+
+— /create
+Title: Create SPL or Token-2022 token | RootRecord Solana Tools
+Meta: One-signature legacy mint + Metaplex metadata, or Token-2022 with extensions
+  and two transactions. Optional logo/metadata IPFS via Pinata.
+H1: Launch your token (keep) + subhead mentioning SPL / Token-2022 explicitly.
+H2: Token details · Token-2022 extensions · Fees and rent
+Internal: Tools → /tools · Docs Token-2022 section → /docs · Pricing → /pricing
+FAQ:
+  Q: What is Metaplex metadata?
+  A: Off-chain name/symbol/URI stored in an on-chain Metaplex account for legacy SPL.
+  Q: What is the TokenMetadata extension?
+  A: On-mint metadata for Token-2022, no separate Metaplex create instruction.
+
+— /tools
+Title: Manage Solana tokens — revoke, mint, metadata, fees
+Meta: On-chain actions: revoke mint/freeze, mint more, update Metaplex metadata,
+  Token-2022 withdraw/harvest/update transfer fee. One signature per action.
+H1: Manage your token like an operator (keep) + clarify SPL + Token-2022 in intro.
+Internal: Create → /create · Docs fee tools → /docs
+FAQ:
+  Q: Why does “Update metadata” say legacy?
+  A: It targets Metaplex metadata for standard SPL mints. Token-2022 metadata uses
+     the mint’s TokenMetadata extension.
+  Q: When do new transfer fees apply after an update?
+  A: SPL Token-2022 schedules changes; typically effective after two epochs.
+
+— /pricing
+Title: Pricing — flat SOL per action | RootRecord
+Meta: Transparent create and tool fees in SOL. Compare to typical market rates.
+  No subscription.
+H1: Pricing / what you pay (align with primary intent).
+Internal: Create → /create · Docs → /docs
+
+— /docs
+Title: Documentation — Solana token create & tools
+Meta: Wallet setup, create flow, Token-2022 extensions, Pinata IPFS, fee tools,
+  referrals, self-host notes.
+H1: Docs (expand to “Documentation” for intent).
+Internal: Create → /create · Tools → /tools
+
+— /privacy & /terms
+Keep concise; add Organization legal name if applicable; no keyword focus.
+
+================================================================================
+SEO — CONTENT RULES (recap)
+================================================================================
+• Entity-rich: Solana program, SPL token account, versioned transaction, priority fee,
+  RPC HTTP method (where relevant).
+• Gloss jargon once per page (e.g. “ATA (associated token account)”).
+• No guaranteed rankings; no financial advice; no fake partnerships.
+
+================================================================================
+SEO — TECHNICAL (recommendations; CMS = N/A, Next app)
+================================================================================
+• CANONICAL: Single URL per page; avoid duplicate query variants as separate copies
+  (dashboard not yet shipped). Use metadata.alternates.canonical per route when
+  NEXT_PUBLIC_SITE_URL is stable.
+• OPEN GRAPH: Set og:title / og:description per page via generateMetadata to override
+  layout defaults on /create, /tools, /pricing, /docs.
+• JSON-LD: Home — SoftwareApplication + Organization; FAQ routes — FAQPage when
+  FAQ blocks are added to pages.
+• IMAGE ALT: Diagrams — describe what the diagram explains, not keyword lists.
+
+================================================================================
+GLOSSARY PAGE (suggested 15–25 terms)
+================================================================================
+Solana, SPL Token, Token-2022, Associated Token Account (ATA), Mint account,
+Mint authority, Freeze authority, Metaplex Token Metadata, Metadata PDA,
+Transaction instruction, Versioned transaction, Blockhash, Confirm transaction,
+Rent-exempt balance, Transfer fee basis points, Withheld transfer fee,
+Harvest / withdraw withheld tokens, TokenMetadata extension, Transfer hook,
+Non-transferable mint, Priority fee, RPC endpoint, Devnet / mainnet-beta.
+
+================================================================================
+END
+================================================================================

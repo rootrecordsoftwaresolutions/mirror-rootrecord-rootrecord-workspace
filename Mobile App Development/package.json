@@ -1,0 +1,18 @@
+{
+  "name": "rootrecord-mobile-workspace",
+  "private": true,
+  "description": "Root workspace for Root Record mobile apps: shared tooling via pnpm; add new apps under apps/ and list them in pnpm-workspace.yaml.",
+  "scripts": {
+    "install:all": "pnpm install",
+    "weather:start": "pnpm --filter rrweather-mobile start",
+    "weather:build": "pnpm --filter rrweather-mobile run build",
+    "weather:test": "pnpm --filter rrweather-mobile test"
+  },
+  "packageManager": "pnpm@10.18.3",
+  "engines": {
+    "node": ">=18"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["core-js", "core-js-pure"]
+  }
+}

@@ -1,0 +1,27 @@
+node_modules
+.next
+out
+tsconfig.tsbuildinfo
+*.log
+.DS_Store
+.vercel
+next-env.d.ts
+
+# Local env (keep .env.example tracked)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Other env files — not the documented example template
+.env.production
+.env.development
+
+credentials.json
+*.pem
+*.key
+.credentials
+
+# Cloudflare Worker mirror (npm in that folder is local only)
+cloudflare/rootrecord-primary/node_modules/
+cloudflare/rootrecord-primary/.wrangler/

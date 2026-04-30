@@ -1,0 +1,16 @@
+{
+  "name": "@rootrecord/windows-app-development",
+  "private": true,
+  "version": "0.0.0",
+  "description": "RootRecord Windows / Electron development workspace (umbrella root; each app lives under apps/).",
+  "license": "UNLICENSED",
+  "scripts": {
+    "check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-prereqs.ps1"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,41 @@
+# Single Worker + single D1 (`root-record` only). Auth lives in this Worker (JWT + license_accounts).
+# Secrets: JWT_SECRET (set by deploy.ps1 from credentials.env and/or gitignored .deploy-* files).
+#
+# Cloudflare account: set CLOUDFLARE_ACCOUNT_ID in repo-root credentials.env (loaded by deploy.ps1), or run `wrangler login`.
+# New D1 in a new account: `npx wrangler d1 create root-record` → paste database_id here and in credentials.env (D1_DATABASE_ID) and rootrecord-license/wrangler.toml.
+name = "rootrecord-primary"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+[triggers]
+crons = ["*/5 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "root-record"
+database_id = "0b49c598-1f91-4a09-84a8-6ba8241c6df3"
+
+[vars]
+SITE_URL = "https://rootrecord.info"
+# AccuWeather weather provider:
+#   wrangler secret put ACCUWEATHER_API_KEY
+# Optional language locale for responses (default in code: en-us)
+ACCUWEATHER_LANGUAGE = "en-us"
+# Dashboard D1 cache: seconds before refetching upstream weather for same/nearby grid.
+WEATHER_DATA_TTL_SEC = "900"
+# Reuse cached weather across users when requested coordinates are within this radius.
+# Lower value = fresher/more precise but more upstream API calls.
+ACCUWEATHER_REUSE_RADIUS_MILES = "25"
+# Stripe Checkout: create a Product + recurring Price in Dashboard → copy Price id (`price_...`).
+# Also run: wrangler secret put STRIPE_SECRET_KEY  (use `sk_live_...` or `sk_test_...` from credentials.env via deploy.ps1)
+# Stripe webhooks live on license: https://rootrecord-license.rootrecord.workers.dev/v1/billing/webhook
+STRIPE_PRICE_ID = "price_REPLACE_WITH_YOUR_STRIPE_PRICE_ID"
+# Stripe Pricing Table (same ids as rootrecord-website Pages Billing; optional here for parity / future use).
+STRIPE_PRICING_TABLE_ID = "prctbl_1TQJ0kIaRpbMiAovAUe3X3QJ"
+STRIPE_PUBLISHABLE_KEY = "pk_live_51T3sezIaRpbMiAov6SUJgKLGR1igmRGOYg1rY1hKJPAWxLXDgJR7kRNSBSM8sJ2Wat1zuC56iE4TCTyPfqmEfTT600cR21LwYA"
+
+# All-device FCM broadcast (POST /api/internal/push-broadcast):
+#   wrangler secret put RR_PUSH_ADMIN_SECRET
+#   wrangler secret put FCM_SERVICE_ACCOUNT_JSON
+# (paste your Firebase service account JSON — one secret; optional split vars still supported)
+

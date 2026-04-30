@@ -1,0 +1,18 @@
+appId: com.rootrecord.weather.manager
+productName: Root Record Weather Manager
+copyright: Copyright Root Record
+# Required when using --prepackaged (no electron dependency in this workspace package).
+electronVersion: "28.3.3"
+directories:
+  output: dist
+  buildResources: build-resources
+win:
+  icon: app/resources/app-icon.ico
+  target:
+    - nsis
+  artifactName: "Root.Record.Weather.Manager-Setup-${version}.${ext}"
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true

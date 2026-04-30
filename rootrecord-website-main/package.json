@@ -1,0 +1,12 @@
+{
+  "name": "rootrecord-website",
+  "private": true,
+  "scripts": {
+    "pages:dev": "wrangler pages dev .",
+    "pages:deploy": "wrangler pages deploy . --project-name=rootrecord-website"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250423.0",
+    "wrangler": "^3.114.0"
+  }
+}

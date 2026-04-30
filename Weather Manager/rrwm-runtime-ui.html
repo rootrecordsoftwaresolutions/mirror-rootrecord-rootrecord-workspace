@@ -1,0 +1,2528 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8" />
+      <title>Root Record Weather Manager</title>
+      <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          margin: 0;
+          padding: 20px;
+          background: #1e1e1e;
+          color: #d4d4d4;
+        }
+        .auth-gate {
+          position: fixed;
+          inset: 0;
+          z-index: 10000;
+          background: #121212;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        .auth-card {
+          width: 100%;
+          max-width: 520px;
+          background: #252526;
+          border-radius: 8px;
+          border: 1px solid #333;
+          padding: 18px;
+        }
+        .container {
+          display: flex;
+          flex-direction: column;
+          height: calc(100vh - 40px);
+          gap: 0;
+          position: relative;
+        }
+        .nav-drawer-backdrop {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 900;
+          display: none;
+        }
+        .nav-drawer-backdrop.nav-backdrop-visible {
+          display: block;
+        }
+        .nav-drawer {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: min(300px, 88vw);
+          height: 100vh;
+          background: #252526;
+          border-right: 1px solid #3c3c3c;
+          z-index: 910;
+          padding: 16px 14px 24px 14px;
+          overflow-y: auto;
+          box-shadow: 6px 0 28px rgba(0, 0, 0, 0.35);
+          transform: translateX(-100%);
+          transition: transform 0.22s ease;
+        }
+        .nav-drawer.nav-drawer-open {
+          transform: translateX(0);
+        }
+        .nav-drawer .btn {
+          width: 100%;
+          text-align: center;
+        }
+        .main-wrap {
+          flex: 1;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+          background: #252526;
+          border-radius: 6px;
+          overflow: hidden;
+        }
+        .guest-mode-banner {
+          flex-shrink: 0;
+          background: #8b1a1a;
+          color: #fff5f5;
+          padding: 10px 16px;
+          font-size: 0.9rem;
+          line-height: 1.45;
+          text-align: center;
+          border-bottom: 1px solid #5c1212;
+        }
+        .guest-mode-banner strong {
+          color: #fff;
+        }
+        .app-top-bar {
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 14px;
+          border-bottom: 1px solid #3c3c3c;
+          background: #2a2a2d;
+        }
+        .app-top-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: #e8e8e8;
+          letter-spacing: 0.02em;
+        }
+        .hamburger-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 42px;
+          height: 42px;
+          padding: 0;
+          margin: 0;
+          background: #3c3c3c;
+          border: 1px solid #555;
+          border-radius: 6px;
+          cursor: pointer;
+          color: #e8e8e8;
+        }
+        .hamburger-btn:hover {
+          background: #4a4a4a;
+        }
+        .hamburger-icon {
+          font-size: 20px;
+          line-height: 1;
+        }
+        .main {
+          flex: 1;
+          min-height: 0;
+          padding: 16px;
+          overflow-y: auto;
+        }
+        .btn {
+          background: #007acc;
+          color: white;
+          border: none;
+          padding: 8px 14px;
+          margin: 4px 0;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        .btn:hover { background: #005f9d; }
+        .btn:disabled {
+          background: #5a5a5a;
+          cursor: not-allowed;
+        }
+        .btn.success { background: #2e7d32; }
+        .btn.success:hover { background: #256628; }
+        .btn.danger { background: #b71c1c; }
+        .btn.danger:hover { background: #8e1616; }
+        .card {
+          background: #2d2d30;
+          border-left: 3px solid #007acc;
+          border-radius: 4px;
+          padding: 10px;
+          margin-bottom: 10px;
+        }
+        .dashboard-grid .card {
+          margin-bottom: 0;
+        }
+        .clickable-card {
+          cursor: pointer;
+          transition: background 0.15s ease, transform 0.08s ease;
+        }
+        .clickable-card:hover {
+          background: #34343a;
+        }
+        .clickable-card:active {
+          transform: translateY(1px);
+        }
+        .status {
+          padding: 10px;
+          border-radius: 4px;
+          margin: 8px 0 14px 0;
+          font-size: 13px;
+        }
+        .status.ok { background: #1b5e20; }
+        .status.warn { background: #8a6d1b; }
+        .status.error { background: #7f1d1d; color: #f5f5f5; }
+        .row { margin-bottom: 10px; }
+        label { display: block; font-size: 12px; color: #b8b8b8; margin-bottom: 4px; }
+        input {
+          width: calc(100% - 16px);
+          padding: 8px;
+          border: 1px solid #555;
+          border-radius: 4px;
+          background: #1e1e1e;
+          color: #d4d4d4;
+        }
+        .location-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 8px;
+          padding: 8px;
+          margin-bottom: 6px;
+          background: #1e1e1e;
+          border-radius: 4px;
+        }
+        .muted { color: #9a9a9a; font-size: 12px; }
+        .section-title { color: #4ec9b0; margin-top: 0; }
+        .result-group { margin-bottom: 22px; }
+        .earthquakes-page-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+          align-items: start;
+          margin-top: 8px;
+        }
+        .earthquakes-page-grid .result-group {
+          margin-bottom: 0;
+        }
+        @media (max-width: 960px) {
+          .earthquakes-page-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        .dashboard-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 8px;
+          margin: 10px 0 14px 0;
+        }
+        .dashboard-grid.dashboard-grid-weather-summary {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        @media (max-width: 1020px) {
+          .dashboard-grid.dashboard-grid-weather-summary {
+            grid-template-columns: 1fr;
+          }
+        }
+        .dashboard-card-span-full {
+          grid-column: 1 / -1;
+        }
+        .weather-satellite-strip {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+          align-items: start;
+        }
+        @media (max-width: 720px) {
+          .weather-satellite-strip {
+            grid-template-columns: 1fr;
+          }
+        }
+        .weather-satellite-cell strong {
+          display: block;
+          margin-bottom: 4px;
+        }
+        .weather-satellite-cell img {
+          width: 100%;
+          max-height: 240px;
+          object-fit: contain;
+          border: 1px solid #333;
+          border-radius: 4px;
+          background: #111;
+        }
+        .map-modal {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.72);
+          z-index: 1200;
+          display: none;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+        }
+        .map-card {
+          width: min(900px, 96vw);
+          height: min(680px, 92vh);
+          background: #252526;
+          border-radius: 8px;
+          border: 1px solid #333;
+          padding: 12px;
+          display: flex;
+          flex-direction: column;
+        }
+        #locationMap {
+          flex: 1;
+          border: 1px solid #333;
+          border-radius: 6px;
+          min-height: 360px;
+          background: #111;
+        }
+        .detail-modal {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.72);
+          z-index: 1201;
+          display: none;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+        }
+        .detail-card {
+          width: min(820px, 96vw);
+          max-height: min(680px, 92vh);
+          overflow: auto;
+          background: #252526;
+          border-radius: 8px;
+          border: 1px solid #333;
+          padding: 12px;
+        }
+        pre {
+          background: #161616;
+          padding: 10px;
+          border-radius: 4px;
+          border: 1px solid #333;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+        }
+      </style>
+    </head>
+    <body>
+      <div id="authGate" class="auth-gate" style="display:flex;">
+        <div class="auth-card">
+          <h1 style="margin-top:0;">Sign in to RootRecord</h1>
+          <p class="muted">Sign in to an existing account, or use <strong>Create account</strong> to register on this device.</p>
+          <div class="row">
+            <label for="authEmail">Email</label>
+            <input id="authEmail" placeholder="you@example.com" />
+          </div>
+          <div class="row">
+            <label for="authPassword">Password</label>
+            <input id="authPassword" type="password" placeholder="At least 10 characters" />
+          </div>
+          <div class="row">
+            <button type="button" id="authSignInBtn" class="btn success">Sign In</button>
+            <button type="button" id="authSignUpBtn" class="btn">Create Account</button>
+            <button type="button" id="authSubscribeBtn" class="btn warning">Subscribe</button>
+            <button type="button" id="authOpenWebsiteBtn" class="btn">Open RootRecord.com</button>
+          </div>
+          <p class="muted" style="font-size:0.88rem;margin:14px 0 0;line-height:1.45;">You can continue <strong>without signing in</strong> for local-only use. This sign-in screen appears every time you open the app until you sign in.</p>
+          <div class="row" style="margin-top:10px;">
+            <button type="button" id="authContinueLocalBtn" class="btn">Continue without signing in</button>
+          </div>
+          <div id="authStatus" class="status" role="status" aria-live="polite" style="display:none;"></div>
+        </div>
+      </div>
+
+      <div id="appShell" class="container" style="display:none;">
+        <div id="navDrawerBackdrop" class="nav-drawer-backdrop" onclick="closeNavDrawer()" aria-hidden="true"></div>
+        <aside id="navDrawer" class="nav-drawer" aria-label="Navigation">
+          <h2 class="section-title">Resources</h2>
+          <button type="button" class="btn" onclick="showPage('weather')">Weather</button>
+          <button type="button" class="btn" onclick="showPage('earthquakes')">Earthquakes & Tsunamis</button>
+          <button type="button" class="btn" onclick="showPage('cyclones')">Cyclone Tracker</button>
+          <button type="button" class="btn" onclick="showPage('wildfires')">Wildfires</button>
+          <button type="button" class="btn" onclick="showPage('settings')">Settings</button>
+          <button type="button" class="btn" onclick="showPage('about')">About / Coverage</button>
+          <button type="button" class="btn" onclick="showPage('contact')">Contact & Feedback</button>
+        </aside>
+
+        <div class="main-wrap">
+          <div id="guestModeBanner" class="guest-mode-banner" role="alert" style="display:none;">
+            <strong>Not signed in.</strong>
+            You are in a restricted local session — Root Record cloud sync and backup are off, Pro-only options stay locked, and live public data refresh is throttled. Sign in from <strong>Settings</strong> when you want full access.
+          </div>
+          <header class="app-top-bar">
+            <button type="button" id="navHamburgerBtn" class="hamburger-btn" onclick="toggleNavDrawer()" aria-label="Open navigation menu" aria-expanded="false" aria-controls="navDrawer">
+              <span class="hamburger-icon" aria-hidden="true">&#9776;</span>
+            </button>
+            <span class="app-top-title">Root Record Weather Manager</span>
+          </header>
+        <main class="main">
+          <div id="weather-page" class="page">
+            <h1>Weather</h1>
+            <p class="muted">Dashboard, active alerts, and future forecast periods for your saved locations.</p>
+            <div class="dashboard-grid dashboard-grid-weather-summary">
+              <div class="card clickable-card" onclick="openDashboardDetail('weatherCurrentCard','Current Conditions')">
+                <h3 style="margin-top:0;">Current Conditions</h3>
+                <div id="weatherCurrentCard" class="muted">No current condition data yet.</div>
+              </div>
+              <div class="card clickable-card" onclick="openDashboardDetail('weatherDailyCard','Daily Forecast')">
+                <h3 style="margin-top:0;">Daily Forecast</h3>
+                <div id="weatherDailyCard" class="muted">No daily forecast data yet.</div>
+              </div>
+              <div class="card clickable-card" onclick="openDashboardDetail('weatherAveragesCard','24h Averages')">
+                <h3 style="margin-top:0;">24h Averages</h3>
+                <div id="weatherAveragesCard" class="muted">No 24-hour average data yet.</div>
+              </div>
+            </div>
+            <div class="dashboard-grid">
+              <div class="card clickable-card dashboard-card-span-full" onclick="openDashboardDetail('weatherRadarCard','Radar layers')">
+                <h3 style="margin-top:0;">Radar layers</h3>
+                <div id="weatherRadarCard" class="muted">No radar layer assets yet.</div>
+              </div>
+              <div class="card clickable-card dashboard-card-span-full" onclick="openDashboardDetail('weatherSatelliteCard','Satellite imagery')">
+                <h3 style="margin-top:0;">Satellite imagery</h3>
+                <div id="weatherSatelliteCard" class="muted">No satellite layer assets yet.</div>
+              </div>
+            </div>
+            <div class="result-group">
+              <h2>Weather alerts</h2>
+              <div id="noaaResults"></div>
+            </div>
+            <div id="canadaAlertsSection" class="result-group" style="display:none;">
+              <h2>Canada weather alerts</h2>
+              <div id="canadaResults"></div>
+            </div>
+            <div class="result-group">
+              <h2>Future forecast periods</h2>
+              <p class="muted" style="margin-top:0;margin-bottom:12px;">Grid forecast periods that start after the current time, for each configured location.</p>
+              <div id="forecastResults"></div>
+            </div>
+          </div>
+
+          <div id="earthquakes-page" class="page" style="display:none;">
+            <h1>Earthquakes & Tsunamis</h1>
+            <p class="muted">USGS earthquakes (last 30 days, newest first) plus tsunami warning center bulletins.</p>
+            <div class="earthquakes-page-grid">
+              <div class="result-group">
+                <h2>USGS Earthquakes</h2>
+                <div id="usgsResults"></div>
+              </div>
+              <div class="result-group">
+                <h2>Tsunami Bulletins</h2>
+                <div id="tsunamiResults"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="cyclones-page" class="page" style="display:none;">
+            <h1>Cyclone Tracker</h1>
+            <p class="muted">Live cyclone events from public event feeds.</p>
+            <div class="result-group">
+              <h2>Active Cyclone Events</h2>
+              <div id="cycloneResults"></div>
+            </div>
+          </div>
+
+          <div id="wildfires-page" class="page" style="display:none;">
+            <h1>Wildfires</h1>
+            <p class="muted">Global wildfire events from public event feeds.</p>
+            <div class="result-group">
+              <h2>Active Wildfire Events</h2>
+              <div id="wildfireResults"></div>
+            </div>
+          </div>
+
+          <div id="settings-page" class="page" style="display:none;">
+            <h1>Settings</h1>
+            <p id="settingsPlanSummary" class="muted" style="margin:4px 0 12px 0;"></p>
+            <div class="card" style="margin-bottom:16px;">
+              <h3 style="margin-top:0;">Data feeds</h3>
+              <p id="dataLastUpdatedLabel" class="muted" style="margin:0 0 10px 0;">Last updated: —</p>
+              <p class="muted" style="font-size:13px;margin:0 0 12px 0;line-height:1.45;">Updates the weather dashboard, alerts, earthquakes, tsunami bulletins, cyclone and wildfire feeds, and location forecasts. Scheduled background refresh still runs automatically.</p>
+              <button type="button" id="settingsRefreshAllBtn" class="btn" onclick="refreshAllDataFromSettings()">Refresh all data</button>
+            </div>
+            <div id="setupStatus" class="status error" style="display:none;" aria-live="polite"></div>
+            <div class="row">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                <input id="openAtLoginToggle" type="checkbox" style="width:20px;height:20px;" onchange="toggleOpenAtLogin()" />
+                <span>Start Root Record Weather Manager when Windows signs in</span>
+              </label>
+            </div>
+            <h3>Root Record account</h3>
+            <p class="muted">Session is stored in <code>license_session.json</code> in this app’s data folder (Business Manager uses the same format).</p>
+            <button type="button" class="btn danger" onclick="authLogout()">Sign out of this device</button>
+            <div class="row">
+              <label for="unitSystem">Units</label>
+              <select id="unitSystem" onchange="onUnitSystemChanged()" style="width:100%;padding:8px;border:1px solid #555;border-radius:4px;background:#1e1e1e;color:#d4d4d4;">
+                <option value="imperial">Imperial (F, mph, mi)</option>
+                <option value="metric">Metric (C, km/h, km)</option>
+              </select>
+            </div>
+            <div class="row">
+              <label for="radiusMiles">Pull Radius (miles)</label>
+              <input id="radiusMiles" placeholder="e.g. 150" />
+            </div>
+            <h3>Critical Popup Alerts</h3>
+            <p id="criticalAlertsProNote" class="muted" style="display:none;margin:4px 0 12px 0;line-height:1.45;"></p>
+            <div class="row">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                <input id="weatherCriticalToggle" type="checkbox" style="width:20px;height:20px;" />
+                <span>Enable weather critical popups (United States + Canada sources)</span>
+              </label>
+            </div>
+            <div class="row">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                <input id="usgsCriticalToggle" type="checkbox" style="width:20px;height:20px;" />
+                <span>Enable USGS earthquake critical popups</span>
+              </label>
+            </div>
+            <div class="row">
+              <label for="usgsMinMagnitude">USGS popup minimum magnitude</label>
+              <input id="usgsMinMagnitude" placeholder="e.g. 3.0" />
+            </div>
+            <div class="row">
+              <label for="usgsPopupDistance">USGS popup max distance (miles)</label>
+              <input id="usgsPopupDistance" placeholder="e.g. 200" />
+            </div>
+            <div class="row">
+              <label for="alertSoundSelect">Critical alert sound</label>
+              <select id="alertSoundSelect" style="width:100%;padding:8px;border:1px solid #555;border-radius:4px;background:#1e1e1e;color:#d4d4d4;">
+                <option value="">No custom sound</option>
+              </select>
+            </div>
+            <button type="button" id="previewAlertSoundBtn" class="btn" onclick="previewSelectedAlertSound()">Test Selected Sound</button>
+            <button type="button" id="saveAlertSettingsBtn" class="btn" onclick="saveAlertSettings()">Save Alert Settings</button>
+            <div class="row">
+              <label for="locationName">Location Name</label>
+              <input id="locationName" placeholder="Home, Shop, Cabin..." />
+            </div>
+            <div class="row">
+              <label for="locationLat">Latitude</label>
+              <input id="locationLat" placeholder="e.g. 47.6062" />
+            </div>
+            <div class="row">
+              <label for="locationLon">Longitude</label>
+              <input id="locationLon" placeholder="e.g. -122.3321" />
+            </div>
+            <button class="btn" onclick="openLocationMapPicker()">Pick on Map</button>
+            <button class="btn" onclick="addLocation()">Add Location</button>
+
+            <h3>Configured Locations</h3>
+            <div id="locationList"></div>
+            <button class="btn success" onclick="completeSetup()">Finalize Setup</button>
+            <div id="setupFinalizeConfirm" class="status ok" role="status" aria-live="polite" style="display:none;margin-top:10px;"></div>
+            <p class="muted">Data calls are blocked until setup is finalized with at least one location.</p>
+
+            <h3 style="margin-top:22px;">Database backups (local)</h3>
+            <p class="muted">SQLite snapshots on this device only. Account data and app-side records are backed by RootRecord’s Cloudflare-backed services; this folder is for your own copies of the local database file.</p>
+            <div class="row">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                <input id="autoBackupToggle" type="checkbox" style="width:20px;height:20px;" />
+                <span>Automatic backups</span>
+              </label>
+            </div>
+            <div class="row">
+              <label for="autoBackupHours">Every (hours)</label>
+              <input id="autoBackupHours" type="number" min="1" step="1" style="width:100%;padding:8px;border:1px solid #555;border-radius:4px;background:#1e1e1e;color:#d4d4d4;" />
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+              <button type="button" class="btn" onclick="backupDatabaseNow()">Backup database now</button>
+              <button type="button" class="btn" onclick="openBackupFolder()">Open backup folder</button>
+              <button type="button" class="btn" onclick="saveBackupSettings()">Save backup settings</button>
+            </div>
+
+            <div class="result-group">
+              <h3>Archive Totals</h3>
+              <pre id="archiveSummary">Loading...</pre>
+            </div>
+          </div>
+          <div id="about-page" class="page" style="display:none;">
+            <h1>About / Data Coverage</h1>
+            <p id="aboutPlanSummary" class="muted" style="margin:4px 0 16px 0;"></p>
+            <div class="card">
+              <h3>Commercial-use data sources included</h3>
+              <p><strong>United States weather:</strong> Federally published alerts (watches, warnings, advisories).</p>
+              <p><strong>Canada weather:</strong> Federally published Canadian alerts where licensing allows redistribution.</p>
+              <p><strong>USGS:</strong> Global earthquake data (last 30 days; includes Asia, Australia, Europe, Africa, and Americas).</p>
+              <p><strong>Tsunami bulletins:</strong> Public tsunami warning center products.</p>
+              <p><strong>NASA EONET:</strong> Public global event feeds used for cyclone and wildfire tracking pages.</p>
+              <p><strong>Grid forecasts:</strong> Location-based future forecast periods on the Weather page.</p>
+            </div>
+            <div class="card">
+              <h3>Regional coverage summary</h3>
+              <p><strong>United States:</strong> Weather alerts + earthquakes.</p>
+              <p><strong>Canada:</strong> Weather alerts + earthquakes.</p>
+              <p><strong>Asia / Australia / Europe / Africa / South America:</strong> Earthquake data now; weather alerts added only when clear free commercial licensing is confirmed.</p>
+            </div>
+            <div class="card">
+              <h3>Why some weather providers are not included yet</h3>
+              <p>Some regional weather APIs require paid commercial plans or separate written licensing agreements. This app only includes sources with clearly documented free commercial reuse rights.</p>
+            </div>
+            <div class="card">
+              <h3>Polling cadence</h3>
+              <p><strong>USGS (Earthquakes & Tsunamis page):</strong> scheduled every 5 minutes for near-real-time updates.</p>
+              <p><strong>All other API sources:</strong> scheduled every 30 minutes.</p>
+            </div>
+            <div class="card">
+              <h3>Software updates</h3>
+              <p class="muted" style="margin-top:0;line-height:1.45;">The Windows installer checks <strong>GitHub Releases</strong> for a newer version (same pattern as RootRecord Business Manager). You get a prompt to download; after download, another prompt to restart and finish installing.</p>
+              <button type="button" class="btn" onclick="checkForUpdatesFromAbout()">Check for updates…</button>
+            </div>
+          </div>
+          <div id="contact-page" class="page" style="display:none;">
+            <h1>Contact & Feedback</h1>
+            <div class="card">
+              <h3>Official Root Record links</h3>
+              <p><strong>Website:</strong> <a href="#" onclick="openRootRecordWebsite()">https://rootrecord.com</a></p>
+              <p><strong>Support email:</strong> <a href="#" onclick="emailRootRecordSupport()">root@rootrecord.info</a></p>
+              <p><strong>Discord (community support):</strong> <a href="#" onclick="openDiscordSupport()">https://discord.gg/CPaDYuFkU</a></p>
+            </div>
+            <div class="card">
+              <h3>Send feedback</h3>
+              <p>Use email or Discord for bug reports, feature requests, and general feedback about Root Record Weather Manager.</p>
+              <button class="btn" onclick="emailRootRecordSupport()">Email support</button>
+              <button class="btn" onclick="openDiscordSupport()">Open Discord</button>
+              <button class="btn" onclick="openRootRecordWebsite()">Open RootRecord.com</button>
+            </div>
+          </div>
+        </main>
+        </div>
+      </div>
+      <div id="mapModal" class="map-modal">
+        <div class="map-card">
+          <h3 style="margin:0 0 8px 0;">Select Location on Map</h3>
+          <p class="muted" style="margin:0 0 8px 0;">Click anywhere to place the marker, then apply coordinates.</p>
+          <div id="locationMap"></div>
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+            <span id="mapCoordLabel" class="muted">No point selected.</span>
+            <div>
+              <button class="btn" onclick="applyPickedLocation()">Use Selected Point</button>
+              <button class="btn danger" onclick="closeLocationMapPicker()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="dashboardDetailModal" class="detail-modal" onclick="closeDashboardDetail(event)">
+        <div class="detail-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
+            <h3 id="dashboardDetailTitle" style="margin:0;">Dashboard Detail</h3>
+            <button class="btn danger" onclick="closeDashboardDetail()">Close</button>
+          </div>
+          <div id="dashboardDetailBody" class="muted">No details loaded yet.</div>
+        </div>
+      </div>
+
+      <script>
+        let ipcRenderer;
+        try {
+          ({ ipcRenderer } = require('electron'));
+        } catch (_error) {
+          const bridge = typeof window !== 'undefined' && window.rootRecordBridge ? window.rootRecordBridge : null;
+          if (bridge && typeof bridge.invoke === 'function') {
+            ipcRenderer = { invoke: (channel, payload) => bridge.invoke(channel, payload) };
+          } else {
+            ipcRenderer = {
+              invoke: async () => {
+                throw new Error('IPC bridge unavailable. Please reinstall the latest build.');
+              }
+            };
+            setTimeout(() => {
+              const statusEl = document.getElementById('authStatus');
+              if (statusEl) {
+                statusEl.style.display = '';
+                statusEl.className = 'status error';
+                statusEl.textContent = 'App runtime not fully initialized. Please reinstall/update this build.';
+              }
+            }, 0);
+          }
+        }
+        let config = {
+          isConfigured: false,
+          radiusMiles: 150,
+          unitSystem: 'imperial',
+          criticalAlerts: {
+            weatherEnabled: true,
+            usgsEnabled: true,
+            usgsMinMagnitude: 5.0,
+            usgsMaxDistanceMiles: 200,
+            soundPath: ''
+          },
+          locations: []
+        };
+        let mapPickerReady = false;
+        let mapPicker;
+        let mapMarker;
+        let pickedLatLon = null;
+        let usgsDetailMap = null;
+        let usgsDetailMapRequestId = 0;
+        let setupFinalizeConfirmTimer = null;
+        let availableAlertSounds = [];
+        let licenseProUnlocked = false;
+        /** True when using the app without a Root Record account (live API refresh is throttled in main). */
+        let guestLiveDataCapped = false;
+
+        async function notifyGuestLiveRefreshCycleComplete() {
+          try {
+            await ipcRenderer.invoke('weather-guest-live-refresh-cycle-complete');
+          } catch (_) {
+            /* ignore */
+          }
+        }
+
+        let guestLiveBundleDepth = 0;
+        async function withGuestLiveBundle(inner) {
+          guestLiveBundleDepth += 1;
+          try {
+            return await inner();
+          } finally {
+            guestLiveBundleDepth -= 1;
+            if (guestLiveBundleDepth <= 0) {
+              guestLiveBundleDepth = 0;
+              void notifyGuestLiveRefreshCycleComplete();
+            }
+          }
+        }
+
+        const detailItems = {
+          noaa: [],
+          canada: [],
+          usgs: [],
+          tsunamis: [],
+          cyclones: [],
+          wildfires: [],
+          forecasts: []
+        };
+
+        function escapeHtml(value) {
+          return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+        }
+
+        const LAST_DATA_REFRESH_KEY = 'rrwm_last_data_refresh';
+
+        function touchDataLastUpdated() {
+          const el = document.getElementById('dataLastUpdatedLabel');
+          const d = new Date();
+          const text = 'Last updated: ' + d.toLocaleString();
+          if (el) el.textContent = text;
+          try {
+            localStorage.setItem(LAST_DATA_REFRESH_KEY, d.toISOString());
+          } catch (e) {
+            /* ignore */
+          }
+        }
+
+        function restoreDataLastUpdatedLabel() {
+          const el = document.getElementById('dataLastUpdatedLabel');
+          if (!el) return;
+          let iso = null;
+          try {
+            iso = localStorage.getItem(LAST_DATA_REFRESH_KEY);
+          } catch (e) {
+            iso = null;
+          }
+          if (iso) {
+            const d = new Date(iso);
+            if (!Number.isNaN(d.getTime())) {
+              el.textContent = 'Last updated: ' + d.toLocaleString();
+              return;
+            }
+          }
+          el.textContent = 'Last updated: —';
+        }
+
+        /**
+         * Inline HTML onclick=... is unreliable for file:// loads in Electron (sidebar may still
+         * work via the did-finish-load fallback). Re-bind as real listeners using the same code.
+         */
+        function wireHtmlOnclickAttributes(root) {
+          const rootEl = root && root.nodeType ? root : document;
+          if (!rootEl || typeof rootEl.querySelectorAll !== 'function') return;
+          const nodes = rootEl.querySelectorAll('[onclick]');
+          for (let i = 0; i < nodes.length; i += 1) {
+            const el = nodes[i];
+            if (el.dataset && el.dataset.rrOnclickWired === '1') continue;
+            const ocRaw = el.getAttribute('onclick');
+            if (!ocRaw) continue;
+            const oc = String(ocRaw).trim();
+            if (!oc) continue;
+            if (el.dataset) el.dataset.rrOnclickWired = '1';
+            el.removeAttribute('onclick');
+            let runner;
+            try {
+              runner = new Function('event', oc);
+            } catch (e) {
+              console.error('[RootRecord Weather Manager] Invalid onclick:', oc, e);
+              continue;
+            }
+            const tag = String(el.tagName || '').toLowerCase();
+            el.addEventListener('click', function (event) {
+              if (tag === 'a') event.preventDefault();
+              try {
+                runner.call(window, event);
+              } catch (err) {
+                console.error('[RootRecord Weather Manager] Action failed:', oc, err);
+              }
+            });
+          }
+        }
+
+        function toNumber(value) {
+          const n = Number(value);
+          return Number.isFinite(n) ? n : null;
+        }
+
+        function getUnitSystem() {
+          return config && config.unitSystem === 'metric' ? 'metric' : 'imperial';
+        }
+
+        function applyCriticalAlertsProLock() {
+          const locked = !licenseProUnlocked;
+          const ids = [
+            'weatherCriticalToggle',
+            'usgsCriticalToggle',
+            'usgsMinMagnitude',
+            'usgsPopupDistance',
+            'alertSoundSelect',
+            'previewAlertSoundBtn',
+            'saveAlertSettingsBtn'
+          ];
+          for (let i = 0; i < ids.length; i += 1) {
+            const el = document.getElementById(ids[i]);
+            if (el) el.disabled = locked;
+          }
+          const note = document.getElementById('criticalAlertsProNote');
+          if (note) {
+            if (!locked) {
+              note.style.display = 'none';
+              note.textContent = '';
+            } else {
+              note.style.display = '';
+              note.textContent =
+                'Critical popups and custom alert sounds are included with Pro. Preferences stay on file for when you upgrade; use RootRecord.com to subscribe.';
+            }
+          }
+        }
+
+        function getAlertPrefs() {
+          const prefs = config && config.criticalAlerts && typeof config.criticalAlerts === 'object' ? config.criticalAlerts : {};
+          const minMagnitude = Number(prefs.usgsMinMagnitude);
+          const maxDistanceMiles = Number(prefs.usgsMaxDistanceMiles);
+          return {
+            weatherEnabled: prefs.weatherEnabled !== false,
+            usgsEnabled: prefs.usgsEnabled !== false,
+            usgsMinMagnitude: Number.isFinite(minMagnitude) ? Math.max(0, minMagnitude) : 5.0,
+            usgsMaxDistanceMiles: Number.isFinite(maxDistanceMiles) && maxDistanceMiles > 0 ? maxDistanceMiles : 200,
+            soundPath: String(prefs.soundPath || '').trim()
+          };
+        }
+
+        function fileUrlFromPath(filePath) {
+          return encodeURI('file:///' + String(filePath || '').replace(/\\/g, '/'));
+        }
+
+        async function loadAlertSounds() {
+          const select = document.getElementById('alertSoundSelect');
+          if (!select) return;
+          availableAlertSounds = await ipcRenderer.invoke('get-alert-sounds');
+          const options = ['<option value="">No custom sound</option>'];
+          for (const sound of availableAlertSounds) {
+            options.push('<option value="' + escapeHtml(sound.path) + '">' + escapeHtml(sound.name) + '</option>');
+          }
+          select.innerHTML = options.join('');
+        }
+
+        function storedMilesToUiRadius(miles) {
+          const n = Number(miles);
+          if (!Number.isFinite(n)) return 150;
+          return getUnitSystem() === 'metric' ? n * 1.60934 : n;
+        }
+
+        function uiRadiusToStoredMiles(uiRadius) {
+          const n = Number(uiRadius);
+          if (!Number.isFinite(n)) return 150;
+          return getUnitSystem() === 'metric' ? (n / 1.60934) : n;
+        }
+
+        function applyRadiusLabelAndValue() {
+          const label = document.querySelector('label[for="radiusMiles"]');
+          if (label) {
+            label.textContent = getUnitSystem() === 'metric' ? 'Pull Radius (km)' : 'Pull Radius (miles)';
+          }
+          const field = document.getElementById('radiusMiles');
+          if (field) field.value = String(storedMilesToUiRadius(config.radiusMiles).toFixed(1).replace(/.0$/, ''));
+          const distLabel = document.querySelector('label[for="usgsPopupDistance"]');
+          if (distLabel) distLabel.textContent = getUnitSystem() === 'metric' ? 'USGS popup max distance (km)' : 'USGS popup max distance (miles)';
+          const distInput = document.getElementById('usgsPopupDistance');
+          if (distInput) distInput.value = String(storedMilesToUiRadius(getAlertPrefs().usgsMaxDistanceMiles).toFixed(1).replace(/.0$/, ''));
+        }
+
+        function applyAlertSettingsFields() {
+          const prefs = getAlertPrefs();
+          const weatherToggle = document.getElementById('weatherCriticalToggle');
+          const usgsToggle = document.getElementById('usgsCriticalToggle');
+          const minMagnitude = document.getElementById('usgsMinMagnitude');
+          const soundSelect = document.getElementById('alertSoundSelect');
+          if (weatherToggle) weatherToggle.checked = Boolean(prefs.weatherEnabled);
+          if (usgsToggle) usgsToggle.checked = Boolean(prefs.usgsEnabled);
+          if (minMagnitude) minMagnitude.value = String(prefs.usgsMinMagnitude);
+          if (soundSelect) soundSelect.value = prefs.soundPath || '';
+        }
+
+        function playAlertSound(soundPath) {
+          const chosenPath = String(soundPath || '').trim();
+          if (!chosenPath) return;
+          try {
+            const audio = new Audio(fileUrlFromPath(chosenPath));
+            audio.volume = 1.0;
+            void audio.play();
+          } catch {
+            // Ignore sound playback errors.
+          }
+        }
+
+        function previewSelectedAlertSound() {
+          if (!licenseProUnlocked) {
+            alert('Custom alert sounds are included with Pro. Subscribe on RootRecord.com to use this.');
+            return;
+          }
+          const select = document.getElementById('alertSoundSelect');
+          if (!select) return;
+          playAlertSound(select.value);
+        }
+
+        async function saveAlertSettings() {
+          if (!licenseProUnlocked) {
+            alert('Critical popups and custom sounds are included with Pro. Subscribe on RootRecord.com to change these settings.');
+            return;
+          }
+          const weatherToggle = document.getElementById('weatherCriticalToggle');
+          const usgsToggle = document.getElementById('usgsCriticalToggle');
+          const minMagnitudeRaw = toNumber((document.getElementById('usgsMinMagnitude') || {}).value || '');
+          const distanceUiRaw = toNumber((document.getElementById('usgsPopupDistance') || {}).value || '');
+          const soundSelect = document.getElementById('alertSoundSelect');
+          const prefs = getAlertPrefs();
+          const next = {
+            weatherEnabled: weatherToggle ? Boolean(weatherToggle.checked) : prefs.weatherEnabled,
+            usgsEnabled: usgsToggle ? Boolean(usgsToggle.checked) : prefs.usgsEnabled,
+            usgsMinMagnitude: minMagnitudeRaw === null || minMagnitudeRaw < 0 ? 5.0 : minMagnitudeRaw,
+            usgsMaxDistanceMiles: distanceUiRaw === null || distanceUiRaw <= 0 ? 200 : uiRadiusToStoredMiles(distanceUiRaw),
+            soundPath: soundSelect ? String(soundSelect.value || '').trim() : prefs.soundPath
+          };
+          config.criticalAlerts = next;
+          config = await ipcRenderer.invoke('save-location-config', config);
+          applyAlertSettingsFields();
+          applyRadiusLabelAndValue();
+        }
+
+        function formatDistanceFromMiles(miles) {
+          const n = Number(miles);
+          if (!Number.isFinite(n)) return 'n/a';
+          if (getUnitSystem() === 'metric') return (n * 1.60934).toFixed(1) + ' km';
+          return n.toFixed(1) + ' mi';
+        }
+
+        function formatTemperatureF(value) {
+          const n = Number(value);
+          if (!Number.isFinite(n)) return 'n/a';
+          if (getUnitSystem() === 'metric') return (((n - 32) * 5) / 9).toFixed(1) + ' C';
+          return n.toFixed(1) + ' F';
+        }
+
+        function formatWindMph(value) {
+          const raw = String(value || '').trim();
+          const first = Number(raw.split(' ')[0]);
+          if (Number.isFinite(first)) {
+            if (getUnitSystem() === 'metric') return (first * 1.60934).toFixed(1) + ' km/h';
+            return first.toFixed(1) + ' mph';
+          }
+          return raw || 'n/a';
+        }
+
+        function normalizeForecastTemp(temp, unit) {
+          const n = Number(temp);
+          const u = String(unit || '').toUpperCase();
+          if (!Number.isFinite(n)) return 'n/a';
+          if (getUnitSystem() === 'imperial') {
+            if (u === 'C') return ((n * 9) / 5 + 32).toFixed(1) + ' F';
+            return n.toFixed(1) + ' F';
+          }
+          if (u === 'F') return (((n - 32) * 5) / 9).toFixed(1) + ' C';
+          return n.toFixed(1) + ' C';
+        }
+
+        function destroyUsgsDetailMap() {
+          if (usgsDetailMap) {
+            try {
+              usgsDetailMap.remove();
+            } catch {
+              /* ignore */
+            }
+            usgsDetailMap = null;
+          }
+        }
+
+        function mountUsgsEventDetailMap(lat, lon) {
+          const host = document.getElementById('usgsEventDetailMapHost');
+          if (!host || !window.L || !host.isConnected) return;
+          destroyUsgsDetailMap();
+          usgsDetailMap = window.L.map(host, { zoomControl: true, attributionControl: true }).setView([lat, lon], 9);
+          window.L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 18,
+            attribution: 'Tiles &copy; Esri'
+          }).addTo(usgsDetailMap);
+          window.L.marker([lat, lon]).addTo(usgsDetailMap);
+          setTimeout(() => {
+            if (usgsDetailMap) usgsDetailMap.invalidateSize();
+          }, 80);
+          setTimeout(() => {
+            if (usgsDetailMap) usgsDetailMap.invalidateSize();
+          }, 400);
+        }
+
+        function ensureLeafletLoaded() {
+          return new Promise((resolve, reject) => {
+            if (window.L) return resolve();
+            const css = document.createElement('link');
+            css.rel = 'stylesheet';
+            css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            document.head.appendChild(css);
+            const js = document.createElement('script');
+            js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            js.onload = () => resolve();
+            js.onerror = () => reject(new Error('Failed to load map library.'));
+            document.head.appendChild(js);
+          });
+        }
+
+        function setMapCoordLabel(text) {
+          const el = document.getElementById('mapCoordLabel');
+          if (el) el.textContent = text;
+        }
+
+        function setPickedLocation(lat, lon) {
+          pickedLatLon = { lat, lon };
+          setMapCoordLabel('Selected: ' + lat.toFixed(6) + ', ' + lon.toFixed(6));
+          if (mapMarker) {
+            mapMarker.setLatLng([lat, lon]);
+          } else {
+            mapMarker = window.L.marker([lat, lon]).addTo(mapPicker);
+          }
+        }
+
+        async function openLocationMapPicker() {
+          try {
+            await ensureLeafletLoaded();
+            const modal = document.getElementById('mapModal');
+            if (modal) modal.style.display = 'flex';
+            const latInput = toNumber((document.getElementById('locationLat') || {}).value || '');
+            const lonInput = toNumber((document.getElementById('locationLon') || {}).value || '');
+            const startLat = latInput !== null ? latInput : 39.8283;
+            const startLon = lonInput !== null ? lonInput : -98.5795;
+            if (!mapPickerReady) {
+              mapPicker = window.L.map('locationMap').setView([startLat, startLon], latInput !== null && lonInput !== null ? 9 : 4);
+              // OSM tile servers can block packaged desktop requests without referrer headers.
+              // Use Esri basemap tiles for a stable, no-auth map picker experience.
+              window.L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                maxZoom: 18,
+                attribution: 'Tiles &copy; Esri'
+              }).addTo(mapPicker);
+              mapPicker.on('click', (evt) => {
+                setPickedLocation(evt.latlng.lat, evt.latlng.lng);
+              });
+              mapPickerReady = true;
+            } else {
+              mapPicker.setView([startLat, startLon], latInput !== null && lonInput !== null ? 9 : 4);
+            }
+            if (latInput !== null && lonInput !== null) {
+              setPickedLocation(latInput, lonInput);
+            } else {
+              pickedLatLon = null;
+              if (mapMarker) {
+                mapPicker.removeLayer(mapMarker);
+                mapMarker = null;
+              }
+              setMapCoordLabel('No point selected.');
+            }
+            setTimeout(() => {
+              if (mapPicker) mapPicker.invalidateSize();
+            }, 20);
+          } catch (error) {
+            alert('Map picker unavailable: ' + error.message);
+          }
+        }
+
+        function closeLocationMapPicker() {
+          const modal = document.getElementById('mapModal');
+          if (modal) modal.style.display = 'none';
+        }
+
+        function applyPickedLocation() {
+          if (!pickedLatLon) {
+            alert('Select a point on the map first.');
+            return;
+          }
+          const latInput = document.getElementById('locationLat');
+          const lonInput = document.getElementById('locationLon');
+          if (latInput) latInput.value = pickedLatLon.lat.toFixed(6);
+          if (lonInput) lonInput.value = pickedLatLon.lon.toFixed(6);
+          closeLocationMapPicker();
+        }
+
+        function openDashboardDetail(sourceId, title) {
+          usgsDetailMapRequestId += 1;
+          destroyUsgsDetailMap();
+          const modal = document.getElementById('dashboardDetailModal');
+          const titleEl = document.getElementById('dashboardDetailTitle');
+          const bodyEl = document.getElementById('dashboardDetailBody');
+          const source = document.getElementById(sourceId);
+          if (!modal || !titleEl || !bodyEl || !source) return;
+          titleEl.textContent = String(title || 'Dashboard Detail');
+          bodyEl.innerHTML = source.innerHTML || '<span class="muted">No detail available yet.</span>';
+          modal.style.display = 'flex';
+        }
+
+        function closeDashboardDetail(event) {
+          if (event && event.target && event.target.id !== 'dashboardDetailModal') return;
+          usgsDetailMapRequestId += 1;
+          destroyUsgsDetailMap();
+          const modal = document.getElementById('dashboardDetailModal');
+          if (modal) modal.style.display = 'none';
+        }
+
+        function openExternalUrl(url) {
+          const cleanUrl = String(url || '').trim();
+          if (!cleanUrl || !/^https?:\/\//i.test(cleanUrl)) return;
+          void ipcRenderer.invoke('open-external-url', cleanUrl);
+        }
+
+        function cyclonesWebSearchUrl(item) {
+          const title = item && item.title != null ? String(item.title).trim() : '';
+          const q = title || 'tropical cyclone';
+          return 'https://www.google.com/search?q=' + encodeURIComponent(q);
+        }
+
+        function wildfiresWebSearchUrl(item) {
+          const title = item && item.title != null ? String(item.title).trim() : '';
+          const q = title || 'wildland fire';
+          return 'https://www.google.com/search?q=' + encodeURIComponent(q);
+        }
+
+        function detailLine(label, value) {
+          const text = String(value == null ? '' : value).trim();
+          if (!text) return '';
+          return '<div style="margin-bottom:6px;"><span class="muted">' + escapeHtml(label) + ':</span> ' + escapeHtml(text) + '</div>';
+        }
+
+        function eventDetailHtml(type, item) {
+          if (!item || typeof item !== 'object') return '<span class="muted">No detail available.</span>';
+          const sourceUrl = String(item.detailUrl || item.url || item.source || '').trim();
+          const lines = [];
+          if (type === 'usgs') {
+            const lat = Number(item.latitude);
+            const lon = Number(item.longitude);
+            if (Number.isFinite(lat) && Number.isFinite(lon)) {
+              lines.push(
+                '<div id="usgsEventDetailMapHost" style="height:220px;width:100%;margin:0 0 12px 0;border-radius:6px;border:1px solid #444;overflow:hidden;background:#111;"></div>'
+              );
+              lines.push(detailLine('Epicenter', lat.toFixed(4) + ', ' + lon.toFixed(4)));
+            }
+            lines.push(detailLine('Magnitude', item.magnitude));
+            lines.push(detailLine('Time', item.time));
+            lines.push(detailLine('Distance', formatDistanceFromMiles(item.distanceMiles)));
+            lines.push(detailLine('Matched Location', item.locationName));
+            lines.push(detailLine('Depth (km)', item.depthKm));
+            lines.push(detailLine('USGS Alert', item.alertLevel));
+            lines.push(detailLine('Status', item.status));
+          } else if (type === 'tsunamis') {
+            lines.push(detailLine('Updated', item.updated || item.published));
+            lines.push(detailLine('Summary', item.summary));
+          } else if (type === 'forecasts') {
+            lines.push(detailLine('Location', item.locationName));
+            lines.push(detailLine('Window', (item.startTime || '') + ' to ' + (item.endTime || '')));
+            lines.push(detailLine('Temperature', normalizeForecastTemp(item.temperature, item.temperatureUnit)));
+            lines.push(detailLine('Forecast', item.detailedForecast || item.shortForecast));
+          } else if (type === 'cyclones') {
+            lines.push(detailLine('Title', item.title));
+            lines.push(detailLine('Event time', item.geometryDate));
+            lines.push(
+              '<p class="muted" style="margin:0 0 10px 0;font-size:13px;line-height:1.45;">Feed product URLs are often blocked off-network; search finds public coverage.</p>'
+            );
+            const searchUrl = cyclonesWebSearchUrl(item);
+            lines.push(
+              '<button class="btn" onclick="openExternalUrl(\'' + escapeHtml(searchUrl).replace(/'/g, '&#039;') + '\')">Search the web</button>'
+            );
+          } else if (type === 'wildfires') {
+            lines.push(detailLine('Title', item.title));
+            lines.push(detailLine('Event time', item.geometryDate));
+            lines.push(
+              '<p class="muted" style="margin:0 0 10px 0;font-size:13px;line-height:1.45;">Feed links often point to restricted government portals (for example IRWIN) that require sign-in. Use search for public news and maps.</p>'
+            );
+            const searchUrl = wildfiresWebSearchUrl(item);
+            lines.push(
+              '<button class="btn" onclick="openExternalUrl(\'' + escapeHtml(searchUrl).replace(/'/g, '&#039;') + '\')">Search the web</button>'
+            );
+          } else {
+            lines.push(detailLine('Title', item.title || item.event || item.name || item.message));
+            lines.push(detailLine('Severity', item.severity));
+            lines.push(detailLine('Location', item.locationName || item.areaDesc));
+            lines.push(detailLine('Time', item.time || item.updated || item.published || item.geometryDate));
+            lines.push(detailLine('Summary', item.headline || item.description || item.summary || item.shortForecast));
+          }
+          if (type !== 'cyclones' && type !== 'wildfires' && sourceUrl && /^https?:\/\//i.test(sourceUrl)) {
+            lines.push(
+              '<button class="btn" onclick="openExternalUrl(\'' + escapeHtml(sourceUrl).replace(/'/g, '&#039;') + '\')">Open Official Source</button>'
+            );
+          }
+          return lines.filter(Boolean).join('');
+        }
+
+        function openEventDetail(type, index) {
+          destroyUsgsDetailMap();
+          usgsDetailMapRequestId += 1;
+          const mapRequestId = usgsDetailMapRequestId;
+          const group = detailItems[type];
+          const item = Array.isArray(group) ? group[index] : null;
+          if (!item) return;
+          const title =
+            item.event || item.title || item.name || item.message || (type.toUpperCase() + ' Event');
+          let titleText = title;
+          if (titleText != null && typeof titleText !== 'string') titleText = String(titleText);
+          const modal = document.getElementById('dashboardDetailModal');
+          const titleEl = document.getElementById('dashboardDetailTitle');
+          const bodyEl = document.getElementById('dashboardDetailBody');
+          if (!modal || !titleEl || !bodyEl) return;
+          titleEl.textContent = String(titleText).slice(0, 500);
+          bodyEl.innerHTML = eventDetailHtml(type, item);
+          wireHtmlOnclickAttributes(bodyEl);
+          modal.style.display = 'flex';
+          if (type === 'usgs') {
+            const la = Number(item.latitude);
+            const lo = Number(item.longitude);
+            if (Number.isFinite(la) && Number.isFinite(lo)) {
+              void ensureLeafletLoaded()
+                .then(() => {
+                  if (mapRequestId !== usgsDetailMapRequestId) return;
+                  mountUsgsEventDetailMap(la, lo);
+                })
+                .catch(() => {});
+            }
+          }
+        }
+
+        function milesBetween(lat1, lon1, lat2, lon2) {
+          const toRad = (n) => n * Math.PI / 180;
+          const earthRadiusMiles = 3958.8;
+          const dLat = toRad(lat2 - lat1);
+          const dLon = toRad(lon2 - lon1);
+          const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          return earthRadiusMiles * c;
+        }
+
+        /** True when a point may receive Canadian federal weather alerts (rough footprint; Alaska US excluded). */
+        function isLocationInCanadaAlertsFootprint(lat, lon) {
+          const la = Number(lat);
+          const lo = Number(lon);
+          if (!Number.isFinite(la) || !Number.isFinite(lo)) return false;
+          if (la < 41.5 || la > 85) return false;
+          if (lo < -141.5 || lo > -52) return false;
+          if (la < 49.0 && lo > -125.0 && lo < -66.5) return false;
+          if (la >= 51.0 && la <= 72.5 && lo >= -169.5 && lo <= -129.0) return false;
+          return true;
+        }
+
+        function hasSavedLocationInCanadaAlertsFootprint() {
+          return Boolean(
+            config &&
+              Array.isArray(config.locations) &&
+              config.locations.some((loc) => isLocationInCanadaAlertsFootprint(loc.latitude, loc.longitude))
+          );
+        }
+
+        function syncCanadaAlertsSectionVisibility() {
+          const wrap = document.getElementById('canadaAlertsSection');
+          const show = hasSavedLocationInCanadaAlertsFootprint();
+          if (wrap) wrap.style.display = show ? '' : 'none';
+          if (!show) {
+            const el = document.getElementById('canadaResults');
+            if (el) el.innerHTML = '';
+            detailItems.canada = [];
+          }
+        }
+
+        function getBoundingBox(locations, milesRadius = 150) {
+          const padDegrees = Math.max(0.3, milesRadius / 69);
+          const lats = locations.map((loc) => loc.latitude);
+          const lons = locations.map((loc) => loc.longitude);
+          return {
+            minLat: Math.max(-90, Math.min(...lats) - padDegrees),
+            maxLat: Math.min(90, Math.max(...lats) + padDegrees),
+            minLon: Math.max(-180, Math.min(...lons) - padDegrees),
+            maxLon: Math.min(180, Math.max(...lons) + padDegrees)
+          };
+        }
+
+        function closeNavDrawer() {
+          const drawer = document.getElementById('navDrawer');
+          const backdrop = document.getElementById('navDrawerBackdrop');
+          const btn = document.getElementById('navHamburgerBtn');
+          if (drawer) drawer.classList.remove('nav-drawer-open');
+          if (backdrop) backdrop.classList.remove('nav-backdrop-visible');
+          if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+
+        function toggleNavDrawer() {
+          const drawer = document.getElementById('navDrawer');
+          const backdrop = document.getElementById('navDrawerBackdrop');
+          const btn = document.getElementById('navHamburgerBtn');
+          if (!drawer || !backdrop) return;
+          const opening = !drawer.classList.contains('nav-drawer-open');
+          if (opening) {
+            drawer.classList.add('nav-drawer-open');
+            backdrop.classList.add('nav-backdrop-visible');
+            if (btn) btn.setAttribute('aria-expanded', 'true');
+          } else {
+            closeNavDrawer();
+          }
+        }
+
+        function showPage(pageName) {
+          const pages = ['weather', 'earthquakes', 'cyclones', 'wildfires', 'settings', 'about', 'contact'];
+          for (const p of pages) {
+            const el = document.getElementById(p + '-page');
+            if (el) el.style.display = p === pageName ? 'block' : 'none';
+          }
+          if (pageName === 'settings') {
+            void refreshBackupPanel();
+            void loadAlertSounds().then(() => {
+              applyAlertSettingsFields();
+              applyCriticalAlertsProLock();
+            });
+          }
+          if (pageName === 'settings' || pageName === 'about') {
+            void refreshPlanSummaryBlurb();
+          }
+          closeNavDrawer();
+        }
+
+        async function refreshPlanSummaryBlurb() {
+          const settingsEl = document.getElementById('settingsPlanSummary');
+          const aboutEl = document.getElementById('aboutPlanSummary');
+          if (!settingsEl && !aboutEl) return;
+          const clear = () => {
+            if (settingsEl) settingsEl.textContent = '';
+            if (aboutEl) aboutEl.textContent = '';
+          };
+          try {
+            const state = await ipcRenderer.invoke('core-auth-state');
+            if (!state || !state.authenticated || !state.entitlement || !state.entitlement.allow) {
+              licenseProUnlocked = false;
+              guestLiveDataCapped = false;
+              clear();
+              applyCriticalAlertsProLock();
+              updateGuestModeBanner();
+              return;
+            }
+            licenseProUnlocked = Boolean(state.entitlement.proUnlocked);
+            let text;
+            guestLiveDataCapped = Boolean(state.guestLocal);
+            if (state.guestLocal) {
+              text =
+                'Local use without a saved Root Record account. The sign-in screen appears on every launch until you sign in. Pro-only features stay locked until then. Live hazard feeds (NOAA, USGS, NASA EONET, etc.) can be refreshed at most once per 24 hours; sign in for automatic updates and unlimited manual refresh.';
+            } else if (state.entitlement.proUnlocked) {
+              text = 'Your plan: Pro — thank you for supporting Root Record.';
+            } else {
+              text =
+                'Your plan: Free — hazard feeds and local database snapshots on this device are included.';
+            }
+            if (settingsEl) settingsEl.textContent = text;
+            if (aboutEl) aboutEl.textContent = text;
+          } catch {
+            licenseProUnlocked = false;
+            guestLiveDataCapped = false;
+            clear();
+          }
+          applyCriticalAlertsProLock();
+          updateGuestModeBanner();
+        }
+
+        function onUnitSystemChanged() {
+          const sel = document.getElementById('unitSystem');
+          if (!sel) return;
+          config.unitSystem = sel.value === 'metric' ? 'metric' : 'imperial';
+          applyRadiusLabelAndValue();
+          applyAlertSettingsFields();
+        }
+
+        async function openRootRecordWebsite() {
+          await ipcRenderer.invoke('open-rootrecord-website');
+        }
+
+        async function emailRootRecordSupport() {
+          await ipcRenderer.invoke('email-rootrecord-support');
+        }
+
+        async function openDiscordSupport() {
+          await ipcRenderer.invoke('open-external-url', 'https://discord.gg/CPaDYuFkU');
+        }
+
+        async function checkForUpdatesFromAbout() {
+          try {
+            await ipcRenderer.invoke('weather-check-for-updates');
+          } catch (e) {
+            alert('Could not check for updates: ' + (e && e.message ? e.message : String(e)));
+          }
+        }
+
+        function setAuthStatus(kind, text) {
+          const el = document.getElementById('authStatus');
+          if (!el) return;
+          const msg = text == null ? '' : String(text);
+          if (!msg.trim()) {
+            el.textContent = '';
+            el.className = 'status';
+            el.style.display = 'none';
+            return;
+          }
+          el.style.display = '';
+          el.className = 'status ' + kind;
+          el.textContent = msg;
+        }
+
+        function humanizeLicenseGateError(err) {
+          let raw = err && err.message ? String(err.message) : String(err || '');
+          raw = raw.replace(/^Error invoking remote method '[^']*':\s*/, '').replace(/^Error:\s*/, '').trim();
+          const blob = raw;
+          if (blob.includes('LR_AUTH_INVALID_PASSWORD')) return 'Password incorrect, please try again.';
+          if (blob.includes('LR_AUTH_ACCOUNT_NOT_FOUND')) {
+            return 'No account found. Create an account or check your email and password.';
+          }
+          if (blob.includes('LR_AUTH_LEGACY_AMBIGUOUS')) {
+            return 'Could not sign in. Check your email and password, or create an account if you are new.';
+          }
+          if (blob.includes('LR_AUTH_PASSWORD_NOT_SET') || blob.includes('PASSWORD_NOT_SET')) {
+            return 'This account does not have a password set yet. Finish setup on the device where you first used RootRecord, then try again here.';
+          }
+          if (blob.includes('LR_AUTH_DEVICE_CONFLICT') || blob.includes('DEVICE_CONFLICT')) {
+            return 'This device is registered to a different RootRecord account. Sign in with the email that first used this PC, or contact support.';
+          }
+          if (blob.includes('LR_AUTH_INVALID_DEVICE_ID')) {
+            return 'Could not verify this PC’s device ID. Quit the app fully and reopen, or reinstall if this repeats.';
+          }
+          if (
+            /fetch failed|network|ECONNREFUSED|ENOTFOUND|timed out|connect timeout|UND_ERR_CONNECT_TIMEOUT/i.test(
+              blob
+            )
+          ) {
+            return 'Could not reach RootRecord servers. Check your internet connection and try again.';
+          }
+          return raw || 'Sign-in failed.';
+        }
+
+        async function authLogout() {
+          if (!confirm('Sign out of your Root Record account on this device?')) return;
+          try {
+            await ipcRenderer.invoke('core-auth-logout');
+            window.location.reload();
+          } catch (e) {
+            alert('Sign out failed: ' + (e && e.message ? e.message : String(e)));
+          }
+        }
+
+        if (typeof document !== 'undefined' && document.addEventListener) {
+          document.addEventListener('keydown', (ev) => {
+            if (ev && ev.key === 'Escape') closeNavDrawer();
+          });
+        }
+
+        if (typeof window !== 'undefined') {
+          window.addEventListener('error', (event) => {
+            const message = event && event.error && event.error.message
+              ? event.error.message
+              : (event && event.message ? event.message : 'Unknown renderer error');
+            setAuthStatus('error', 'UI runtime error: ' + message);
+          });
+          window.addEventListener('unhandledrejection', (event) => {
+            const reason = event && event.reason;
+            const message = reason && reason.message ? reason.message : String(reason || 'Unknown async error');
+            setAuthStatus('error', 'UI async error: ' + message);
+          });
+        }
+
+        function updateGuestModeBanner() {
+          const el = document.getElementById('guestModeBanner');
+          if (!el) return;
+          el.style.display = guestLiveDataCapped ? 'block' : 'none';
+        }
+
+        function showMainApp() {
+          setAuthStatus('', '');
+          const gate = document.getElementById('authGate');
+          const appShell = document.getElementById('appShell');
+          if (gate) gate.style.display = 'none';
+          if (appShell) appShell.style.display = 'flex';
+          updateGuestModeBanner();
+        }
+
+        async function initializeAuthGate() {
+          try {
+            const state = await Promise.race([
+              ipcRenderer.invoke('core-auth-state'),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Session check timed out. Please sign in manually.')), 15000))
+            ]);
+            if (state.authenticated) {
+              guestLiveDataCapped = Boolean(state.guestLocal);
+              await loadConfig();
+              showMainApp();
+              void refreshPlanSummaryBlurb();
+              return;
+            }
+            const emailInput = document.getElementById('authEmail');
+            if (emailInput && state.email) emailInput.value = state.email;
+            guestLiveDataCapped = false;
+            setAuthStatus('warn', state.message || 'Sign in required.');
+            const gateEl = document.getElementById('authGate');
+            const shellEl = document.getElementById('appShell');
+            if (gateEl) gateEl.style.display = 'flex';
+            if (shellEl) shellEl.style.display = 'none';
+          } catch (error) {
+            guestLiveDataCapped = false;
+            setAuthStatus('error', 'Auth check failed: ' + error.message);
+            const gateEl = document.getElementById('authGate');
+            const shellEl = document.getElementById('appShell');
+            if (gateEl) gateEl.style.display = 'flex';
+            if (shellEl) shellEl.style.display = 'none';
+          }
+        }
+
+        async function authSignIn() {
+          const email = (document.getElementById('authEmail') || {}).value || '';
+          const password = (document.getElementById('authPassword') || {}).value || '';
+          setAuthStatus('warn', 'Signing in...');
+          try {
+            const result = await ipcRenderer.invoke('core-auth-login', { email, password });
+            if (result && result.entitlement && result.entitlement.allow) {
+              setAuthStatus('ok', 'Sign-in successful.');
+              guestLiveDataCapped = false;
+              await loadConfig();
+              showMainApp();
+              void refreshPlanSummaryBlurb();
+            } else {
+              setAuthStatus(
+                'warn',
+                'Signed in, but Weather Manager did not open for this account yet. Check RootRecord.com or try again later.'
+              );
+            }
+          } catch (error) {
+            setAuthStatus('error', humanizeLicenseGateError(error));
+          }
+        }
+
+        async function authContinueWithoutAccount() {
+          setAuthStatus('warn', 'Opening local session…');
+          try {
+            await ipcRenderer.invoke('core-auth-continue-without-account');
+            guestLiveDataCapped = true;
+            await loadConfig();
+            showMainApp();
+            void refreshPlanSummaryBlurb();
+          } catch (error) {
+            setAuthStatus('error', error && error.message ? error.message : String(error));
+          }
+        }
+
+        async function authSignUp() {
+          const email = (document.getElementById('authEmail') || {}).value || '';
+          const password = (document.getElementById('authPassword') || {}).value || '';
+          setAuthStatus('warn', 'Creating account...');
+          try {
+            const result = await ipcRenderer.invoke('core-auth-signup', { email, password });
+            if (result && result.entitlement && result.entitlement.allow) {
+              setAuthStatus('ok', 'Account created. You’re signed in.');
+              guestLiveDataCapped = false;
+              await loadConfig();
+              showMainApp();
+              void refreshPlanSummaryBlurb();
+            } else {
+              setAuthStatus('warn', 'Account created, but access not yet granted.');
+            }
+          } catch (error) {
+            setAuthStatus('error', humanizeLicenseGateError(error));
+          }
+        }
+
+        async function startCheckout() {
+          setAuthStatus('warn', 'Opening subscription checkout...');
+          try {
+            await ipcRenderer.invoke('core-auth-checkout');
+            setAuthStatus('ok', 'Checkout opened in your browser. Return after purchase and sign in again.');
+          } catch (error) {
+            setAuthStatus('error', 'Checkout failed: ' + error.message);
+          }
+        }
+
+        async function renderArchiveSummary() {
+          const summary = document.getElementById('archiveSummary');
+          if (!summary) return;
+          const archive = await ipcRenderer.invoke('archive-summary');
+          summary.textContent =
+            'U.S. weather saved records: ' + archive.noaa +
+            '\nCanada weather saved records: ' + archive.canada +
+            '\nUSGS saved records: ' + archive.usgs +
+            '\nTsunami saved records: ' + archive.tsunamis +
+            '\nWeather dashboard snapshots: ' + archive.noaaDashboard +
+            '\nCyclone saved records: ' + archive.cyclones +
+            '\nWildfire saved records: ' + archive.wildfires +
+            '\nForecast saved records: ' + archive.forecasts;
+        }
+
+        async function restoreFromArchive() {
+          try {
+            const snapshot = await ipcRenderer.invoke('archive-latest', { count: 250 });
+            const noaaItems = Array.isArray(snapshot.noaa) ? snapshot.noaa : [];
+            const canadaItems = Array.isArray(snapshot.canada) ? snapshot.canada : [];
+            const usgsItems = Array.isArray(snapshot.usgs) ? snapshot.usgs : [];
+            const tsunamiItems = Array.isArray(snapshot.tsunamis) ? snapshot.tsunamis : [];
+            const dashboard = snapshot.noaaDashboard && typeof snapshot.noaaDashboard === 'object' ? snapshot.noaaDashboard : null;
+            const cycloneItems = Array.isArray(snapshot.cyclones) ? snapshot.cyclones : [];
+            const wildfireItems = Array.isArray(snapshot.wildfires) ? snapshot.wildfires : [];
+            const forecastItems = Array.isArray(snapshot.forecasts) ? snapshot.forecasts : [];
+
+            if (dashboard) renderNoaaDashboard(dashboard);
+            renderNoaa(noaaItems);
+            syncCanadaAlertsSectionVisibility();
+            renderCanadaAlerts(canadaItems);
+            usgsItems.sort((a, b) => (Number(b.timeMs) || 0) - (Number(a.timeMs) || 0));
+            renderUsgs(usgsItems);
+            renderTsunamis(tsunamiItems);
+            renderCyclones(cycloneItems);
+            renderWildfires(wildfireItems);
+            renderForecasts(forecastItems);
+          } catch {
+            // Ignore archive restore failures to keep startup resilient.
+          }
+        }
+
+        function hideSetupFinalizeConfirm() {
+          if (setupFinalizeConfirmTimer) {
+            clearTimeout(setupFinalizeConfirmTimer);
+            setupFinalizeConfirmTimer = null;
+          }
+          const el = document.getElementById('setupFinalizeConfirm');
+          if (el) {
+            el.style.display = 'none';
+            el.textContent = '';
+          }
+        }
+
+        function showSetupFinalizeConfirm() {
+          hideSetupFinalizeConfirm();
+          const el = document.getElementById('setupFinalizeConfirm');
+          if (!el) return;
+          el.style.display = '';
+          el.className = 'status ok';
+          el.textContent = 'Settings saved successfully.';
+          setupFinalizeConfirmTimer = setTimeout(() => {
+            hideSetupFinalizeConfirm();
+          }, 6000);
+        }
+
+        function renderSetupState() {
+          const setupStatus = document.getElementById('setupStatus');
+          const settingsRefreshAllBtn = document.getElementById('settingsRefreshAllBtn');
+          if (config.isConfigured) {
+            if (setupStatus) {
+              setupStatus.style.display = 'none';
+              setupStatus.textContent = '';
+            }
+            if (settingsRefreshAllBtn) settingsRefreshAllBtn.disabled = false;
+          } else {
+            if (setupStatus) {
+              setupStatus.style.display = '';
+              setupStatus.className = 'status error';
+              setupStatus.textContent = 'Setting Not Configured';
+            }
+            if (settingsRefreshAllBtn) settingsRefreshAllBtn.disabled = true;
+          }
+          syncCanadaAlertsSectionVisibility();
+        }
+
+        function renderLocations() {
+          const list = document.getElementById('locationList');
+          if (!config.locations.length) {
+            list.innerHTML = '<p class="muted">No locations configured yet.</p>';
+            return;
+          }
+          list.innerHTML = config.locations.map((loc, idx) => {
+            return `
+              <div class="location-row">
+                <div>
+                  <strong>${escapeHtml(loc.name)}</strong><br/>
+                  <span class="muted">${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}</span>
+                </div>
+                <button class="btn danger" onclick="removeLocation(${idx})">Remove</button>
+              </div>
+            `;
+          }).join('');
+          wireHtmlOnclickAttributes(list);
+        }
+
+        async function refreshBackupPanel() {
+          try {
+            const data = await ipcRenderer.invoke('backup-get-state');
+            const s = data.settings || {};
+            const autoEl = document.getElementById('autoBackupToggle');
+            if (autoEl) autoEl.checked = Boolean(s.auto_backup_enabled);
+            const hoursEl = document.getElementById('autoBackupHours');
+            if (hoursEl) hoursEl.value = String(Math.max(1, parseInt(String(s.auto_backup_interval_hours || 24), 10) || 24));
+          } catch {
+            /* ignore */
+          }
+        }
+
+        async function saveBackupSettings() {
+          const autoEl = document.getElementById('autoBackupToggle');
+          const hoursEl = document.getElementById('autoBackupHours');
+          const payload = {
+            auto_backup_enabled: Boolean(autoEl && autoEl.checked),
+            auto_backup_interval_hours: Math.max(1, parseInt(String((hoursEl && hoursEl.value) || '24'), 10) || 24)
+          };
+          await ipcRenderer.invoke('backup-save-settings', payload);
+          await refreshBackupPanel();
+        }
+
+        async function backupDatabaseNow() {
+          try {
+            await ipcRenderer.invoke('backup-now', 'manual');
+            await refreshBackupPanel();
+            alert('Local database backup completed.');
+          } catch (e) {
+            alert('Backup failed: ' + (e && e.message ? e.message : String(e)));
+          }
+        }
+
+        async function openBackupFolder() {
+          await ipcRenderer.invoke('backup-open-folder');
+        }
+
+        async function loadConfig() {
+          config = await ipcRenderer.invoke('get-location-config');
+          const openAtLogin = await ipcRenderer.invoke('get-open-at-login');
+          const openAtLoginToggle = document.getElementById('openAtLoginToggle');
+          if (openAtLoginToggle) openAtLoginToggle.checked = Boolean(openAtLogin);
+          const unitSel = document.getElementById('unitSystem');
+          if (unitSel) unitSel.value = config.unitSystem === 'metric' ? 'metric' : 'imperial';
+          await loadAlertSounds();
+          applyRadiusLabelAndValue();
+          applyAlertSettingsFields();
+          renderLocations();
+          renderSetupState();
+          await restoreFromArchive();
+          await renderArchiveSummary();
+          await refreshBackupPanel();
+          await refreshPlanSummaryBlurb();
+          restoreDataLastUpdatedLabel();
+        }
+
+        async function toggleOpenAtLogin() {
+          const openAtLoginToggle = document.getElementById('openAtLoginToggle');
+          if (!openAtLoginToggle) return;
+          await ipcRenderer.invoke('set-open-at-login', Boolean(openAtLoginToggle.checked));
+        }
+
+        async function addLocation() {
+          const name = document.getElementById('locationName').value.trim();
+          const latitude = toNumber(document.getElementById('locationLat').value.trim());
+          const longitude = toNumber(document.getElementById('locationLon').value.trim());
+          const radiusUiRaw = toNumber(document.getElementById('radiusMiles').value.trim());
+          const radiusUi = radiusUiRaw === null || radiusUiRaw <= 0 ? storedMilesToUiRadius(150) : radiusUiRaw;
+          const radiusMiles = uiRadiusToStoredMiles(radiusUi);
+          if (!name) {
+            alert('Location name is required.');
+            return;
+          }
+          if (latitude === null || longitude === null) {
+            alert('Latitude and longitude must be valid numbers.');
+            return;
+          }
+          if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            alert('Latitude must be -90 to 90 and longitude must be -180 to 180.');
+            return;
+          }
+          config.locations.push({ name, latitude, longitude });
+          config.isConfigured = false;
+          hideSetupFinalizeConfirm();
+          config.radiusMiles = radiusMiles;
+          config.unitSystem = getUnitSystem();
+          config = await ipcRenderer.invoke('save-location-config', config);
+          document.getElementById('locationName').value = '';
+          document.getElementById('locationLat').value = '';
+          document.getElementById('locationLon').value = '';
+          applyRadiusLabelAndValue();
+          renderLocations();
+          renderSetupState();
+        }
+
+        async function removeLocation(index) {
+          config.locations.splice(index, 1);
+          config.isConfigured = false;
+          hideSetupFinalizeConfirm();
+          const radiusUi = toNumber(document.getElementById('radiusMiles').value.trim());
+          if (radiusUi && radiusUi > 0) config.radiusMiles = uiRadiusToStoredMiles(radiusUi);
+          config.unitSystem = getUnitSystem();
+          config = await ipcRenderer.invoke('save-location-config', config);
+          applyRadiusLabelAndValue();
+          renderLocations();
+          renderSetupState();
+        }
+
+        async function completeSetup() {
+          const radiusUiRaw = toNumber(document.getElementById('radiusMiles').value.trim());
+          const radiusUi = radiusUiRaw === null || radiusUiRaw <= 0 ? storedMilesToUiRadius(150) : radiusUiRaw;
+          const radiusMiles = uiRadiusToStoredMiles(radiusUi);
+          if (!config.locations.length) {
+            alert('At least one location is required before finalizing setup.');
+            return;
+          }
+          config.radiusMiles = radiusMiles;
+          config.unitSystem = getUnitSystem();
+          config.isConfigured = true;
+          config = await ipcRenderer.invoke('save-location-config', config);
+          applyRadiusLabelAndValue();
+          renderSetupState();
+          showSetupFinalizeConfirm();
+          void refreshData();
+        }
+
+        function renderNoaa(items) {
+          const el = document.getElementById('noaaResults');
+          detailItems.noaa = Array.isArray(items) ? items : [];
+          if (!items.length) {
+            el.innerHTML = '<p class="muted">No active alerts near your configured locations.</p>';
+            return;
+          }
+          el.innerHTML = items.map((item, index) => {
+            return `
+              <div class="card clickable-card" onclick="openEventDetail('noaa', ${index})">
+                <strong>${escapeHtml(item.event || 'Alert')}</strong><br/>
+                <span class="muted">${escapeHtml(item.severity || 'Unknown severity')} | ${escapeHtml(item.areaDesc || 'No area provided')}</span><br/>
+                <span class="muted">Matched location: ${escapeHtml(item.locationName)}</span><br/>
+                <span>${escapeHtml(item.headline || 'No headline')}</span>
+              </div>
+            `;
+          }).join('');
+          wireHtmlOnclickAttributes(el);
+        }
+
+        function renderNoaaDashboard(data) {
+          const currentEl = document.getElementById('weatherCurrentCard');
+          const dailyEl = document.getElementById('weatherDailyCard');
+          const avgEl = document.getElementById('weatherAveragesCard');
+          const radarEl = document.getElementById('weatherRadarCard');
+          const satelliteEl = document.getElementById('weatherSatelliteCard');
+          if (!currentEl || !dailyEl || !avgEl || !radarEl || !satelliteEl) return;
+
+          const currentRows = Array.isArray(data && data.current) ? data.current : [];
+          if (!currentRows.length) {
+            currentEl.innerHTML = '<span class="muted">No current conditions available.</span>';
+          } else {
+            currentEl.innerHTML = currentRows.map((row) => {
+              return `
+                <div style="margin-bottom:10px;">
+                  <strong style="font-size:15px;">${escapeHtml(row.locationName)}</strong><br/>
+                  <span class="muted">${escapeHtml(row.text || 'Current')}</span><br/>
+                  <span>Temp: ${escapeHtml(formatTemperatureF(row.temperatureF))}, Wind: ${escapeHtml(formatWindMph(row.windMph))}</span>
+                </div>
+              `;
+            }).join('');
+          }
+
+          const dailyRows = Array.isArray(data && data.daily) ? data.daily : [];
+          if (!dailyRows.length) {
+            dailyEl.innerHTML = '<span class="muted">No daily forecast periods available.</span>';
+          } else {
+            dailyEl.innerHTML = dailyRows.map((row) => {
+              return `
+                <div style="margin-bottom:8px;">
+                  <strong>${escapeHtml(row.locationName)} - ${escapeHtml(row.name)}</strong><br/>
+                  <span>${escapeHtml(row.shortForecast || '')}</span><br/>
+                  <span class="muted">${escapeHtml(normalizeForecastTemp(row.temperature, row.temperatureUnit))}</span>
+                </div>
+              `;
+            }).join('');
+          }
+
+          const avgRows = Array.isArray(data && data.averages) ? data.averages : [];
+          if (!avgRows.length) {
+            avgEl.innerHTML = '<span class="muted">No hourly data available for averages.</span>';
+          } else {
+            avgEl.innerHTML = avgRows.map((row) => {
+              return `
+                <div style="margin-bottom:8px;">
+                  <strong>${escapeHtml(row.locationName)}</strong><br/>
+                  <span>Avg Temp (24h): ${escapeHtml(formatTemperatureF(row.avgTempF))}</span><br/>
+                  <span>Avg Wind (24h): ${escapeHtml(formatWindMph(row.avgWindMph))}</span>
+                </div>
+              `;
+            }).join('');
+          }
+
+          const radarRows = Array.isArray(data && data.radar) ? data.radar : [];
+          if (!radarRows.length) {
+            radarEl.innerHTML = '<span class="muted">No radar station assets available for configured locations.</span>';
+          } else {
+            radarEl.innerHTML = radarRows.map((row) => {
+              return `
+                <div style="margin-bottom:10px;">
+                  <strong>${escapeHtml(row.locationName)}</strong><br/>
+                  <span class="muted">Station: ${escapeHtml(row.station)}</span><br/>
+                  <img src="${escapeHtml(row.url)}" alt="Radar loop" style="width:100%;max-height:min(420px,55vh);object-fit:contain;border:1px solid #333;border-radius:4px;background:#111;" />
+                </div>
+              `;
+            }).join('');
+          }
+
+          const satelliteRows = Array.isArray(data && data.satellite) ? data.satellite : [];
+          if (!satelliteRows.length) {
+            satelliteEl.innerHTML = '<span class="muted">No satellite assets available.</span>';
+          } else {
+            satelliteEl.innerHTML =
+              '<div class="weather-satellite-strip">' +
+              satelliteRows
+                .map((row) => {
+                  return (
+                    '<div class="weather-satellite-cell">' +
+                    '<strong>' +
+                    escapeHtml(row.label) +
+                    '</strong>' +
+                    '<img src="' +
+                    escapeHtml(row.url) +
+                    '" alt="Satellite image" />' +
+                    '</div>'
+                  );
+                })
+                .join('') +
+              '</div>';
+          }
+        }
+
+        function renderCanadaAlerts(items) {
+          const el = document.getElementById('canadaResults');
+          if (!el) return;
+          if (!hasSavedLocationInCanadaAlertsFootprint()) {
+            detailItems.canada = [];
+            el.innerHTML = '';
+            return;
+          }
+          detailItems.canada = Array.isArray(items) ? items : [];
+          if (!items.length) {
+            el.innerHTML = '<p class="muted">No active Canada-region alerts for your saved locations.</p>';
+            return;
+          }
+          el.innerHTML = items.map((item, index) => {
+            return `
+              <div class="card clickable-card" onclick="openEventDetail('canada', ${index})">
+                <strong>${escapeHtml(item.event || item.title || 'Alert')}</strong><br/>
+                <span class="muted">${escapeHtml(item.severity || 'Unknown severity')} | ${escapeHtml(item.areaDesc || 'No area provided')}</span><br/>
+                <span class="muted">Matched location: ${escapeHtml(item.locationName)}</span><br/>
+                <span>${escapeHtml(item.headline || item.description || 'No headline')}</span>
+              </div>
+            `;
+          }).join('');
+          wireHtmlOnclickAttributes(el);
+        }
+
+        function renderUsgs(items) {
+          const el = document.getElementById('usgsResults');
+          detailItems.usgs = Array.isArray(items) ? items : [];
+          if (!items.length) {
+            el.innerHTML = '<p class="muted">No recent earthquakes within your configured radius.</p>';
+            return;
+          }
+          el.innerHTML = items.map((item, index) => {
+            return `
+              <div class="card clickable-card" onclick="openEventDetail('usgs', ${index})">
+                <strong>M${escapeHtml(item.magnitude)} - ${escapeHtml(item.place)}</strong><br/>
+                <span class="muted">${escapeHtml(item.time)} | ${escapeHtml(formatDistanceFromMiles(item.distanceMiles))} from ${escapeHtml(item.locationName)}</span>
+              </div>
+            `;
+          }).join('');
+          wireHtmlOnclickAttributes(el);
+        }
+
+        function renderTsunamis(items) {
+          const el = document.getElementById('tsunamiResults');
+          if (!el) return;
+          detailItems.tsunamis = Array.isArray(items) ? items : [];
+          if (!items.length) {
+            el.innerHTML = '<p class="muted">No active tsunami bulletins found.</p>';
+            return;
+          }
+          el.innerHTML = items.map((item, index) => {
+            return `
+              <div class="card clickable-card" onclick="openEventDetail('tsunamis', ${index})">
+                <strong>${escapeHtml(item.title || 'Tsunami Bulletin')}</strong><br/>
+                <span class="muted">${escapeHtml(item.updated || item.published || '')}</span><br/>
+                <span>${escapeHtml(item.summary || 'No bulletin summary')}</span>
+              </div>
+            `;
+          }).join('');
+          wireHtmlOnclickAttributes(el);
+        }
+
+        function renderCyclones(items) {
+          const el = document.getElementById('cycloneResults');
+          if (!el) return;
+          detailItems.cyclones = Array.isArray(items) ? items : [];
+          if (!items.length) {
+            el.innerHTML = '<p class="muted">No active cyclone events found.</p>';
+            return;
+          }
+          el.innerHTML = items.map((item, index) => {
+            return `
+              <div class="card clickable-card" onclick="openEventDetail('cyclones', ${index})">
+                <strong>${escapeHtml(item.title || 'Cyclone Event')}</strong><br/>
+                <span class="muted">${escapeHtml(item.geometryDate || '')}</span><br/>
+                <span class="muted">NASA EONET · open for web search</span>
+              </div>
+            `;
+          }).join('');
+          wireHtmlOnclickAttributes(el);
+        }
+
+        function renderWildfires(items) {
+          const el = document.getElementById('wildfireResults');
+          if (!el) return;
+          detailItems.wildfires = Array.isArray(items) ? items : [];
+          if (!items.length) {
+            el.innerHTML = '<p class="muted">No active wildfire events found.</p>';
+            return;
+          }
+          el.innerHTML = items.map((item, index) => {
+            return `
+              <div class="card clickable-card" onclick="openEventDetail('wildfires', ${index})">
+                <strong>${escapeHtml(item.title || 'Wildfire Event')}</strong><br/>
+                <span class="muted">${escapeHtml(item.geometryDate || '')}</span><br/>
+                <span class="muted">NASA EONET · open for web search</span>
+              </div>
+            `;
+          }).join('');
+          wireHtmlOnclickAttributes(el);
+        }
+
+        function renderForecasts(items) {
+          const el = document.getElementById('forecastResults');
+          if (!el) return;
+          detailItems.forecasts = Array.isArray(items) ? items : [];
+          if (!items.length) {
+            el.innerHTML = '<p class="muted">No future forecast periods available for configured locations.</p>';
+            return;
+          }
+          el.innerHTML = items.map((item, index) => {
+            return `
+              <div class="card clickable-card" onclick="openEventDetail('forecasts', ${index})">
+                <strong>${escapeHtml(item.locationName)} - ${escapeHtml(item.name || 'Forecast')}</strong><br/>
+                <span class="muted">${escapeHtml(item.startTime || '')} to ${escapeHtml(item.endTime || '')}</span><br/>
+                <span>${escapeHtml(item.detailedForecast || item.shortForecast || '')}</span><br/>
+                <span class="muted">${escapeHtml(normalizeForecastTemp(item.temperature, item.temperatureUnit))}</span>
+              </div>
+            `;
+          }).join('');
+          wireHtmlOnclickAttributes(el);
+        }
+
+        function isCriticalNoaaEvent(item) {
+          const event = String(item.event || '').toLowerCase();
+          const severity = String(item.severity || '').toLowerCase();
+          const criticalKeywords = ['tornado', 'hurricane', 'tsunami', 'flash flood warning', 'blizzard', 'severe thunderstorm warning'];
+          return severity === 'extreme' || severity === 'severe' || criticalKeywords.some((key) => event.includes(key));
+        }
+
+        async function maybeTriggerCriticalPopup(noaaItems, usgsItems, canadaItems) {
+          if (!licenseProUnlocked) return;
+          const prefs = getAlertPrefs();
+          const criticalNoaa = prefs.weatherEnabled ? noaaItems.filter(isCriticalNoaaEvent) : [];
+          const criticalCanada = prefs.weatherEnabled ? (canadaItems || []).filter((item) => isCriticalNoaaEvent(item)) : [];
+          const criticalUsgs = prefs.usgsEnabled
+            ? usgsItems.filter((item) => {
+              const magnitude = Number(item.magnitude);
+              const distance = Number(item.distanceMiles);
+              return Number.isFinite(magnitude) &&
+                magnitude >= prefs.usgsMinMagnitude &&
+                Number.isFinite(distance) &&
+                distance <= prefs.usgsMaxDistanceMiles;
+            })
+            : [];
+          if (!criticalNoaa.length && !criticalUsgs.length && !criticalCanada.length) return;
+          const lines = [];
+          for (const item of criticalNoaa.slice(0, 6)) {
+            lines.push('[U.S. Weather] ' + (item.event || 'Critical alert') + ' near ' + item.locationName);
+          }
+          for (const item of criticalCanada.slice(0, 6)) {
+            lines.push('[Canada] ' + (item.event || item.title || 'Critical alert') + ' near ' + item.locationName);
+          }
+          for (const item of criticalUsgs.slice(0, 6)) {
+            lines.push('[USGS] M' + item.magnitude + ' - ' + item.place + ' (' + formatDistanceFromMiles(item.distanceMiles) + ' from ' + item.locationName + ')');
+          }
+          playAlertSound(prefs.soundPath);
+          await ipcRenderer.invoke('show-critical-popup', {
+            title: 'Critical Weather / Seismic Alert',
+            lines
+          });
+        }
+
+        async function refreshNoaa() {
+          if (!config.isConfigured || !config.locations.length) {
+            alert('Setup must be completed before data can be retrieved.');
+            return;
+          }
+          await withGuestLiveBundle(async () => {
+          try {
+            syncCanadaAlertsSectionVisibility();
+            const includeCanada = hasSavedLocationInCanadaAlertsFootprint();
+            const noaa = await ipcRenderer.invoke('fetch-noaa-alerts');
+            let canada = { features: [] };
+            if (includeCanada) {
+              canada = await ipcRenderer.invoke('fetch-canada-alerts');
+            }
+            const dashboard = await ipcRenderer.invoke('fetch-noaa-dashboard', { locations: config.locations });
+
+            const filteredNoaa = [];
+            for (const feature of noaa.features || []) {
+              const props = feature.properties || {};
+              const area = String(props.areaDesc || '').toLowerCase();
+              for (const loc of config.locations) {
+                if (area.includes(loc.name.toLowerCase())) {
+                  filteredNoaa.push({
+                    id: props.id || props.messageType || props.event + ':' + props.sent,
+                    event: props.event,
+                    severity: props.severity,
+                    areaDesc: props.areaDesc,
+                    headline: props.headline,
+                    locationName: loc.name
+                  });
+                  break;
+                }
+              }
+            }
+            const filteredCanada = [];
+            if (includeCanada) {
+              for (const feature of canada.features || []) {
+                const props = feature.properties || {};
+                const area = String(
+                  props.areaDesc ||
+                  props.area ||
+                  props.title ||
+                  props.description ||
+                  ''
+                ).toLowerCase();
+                for (const loc of config.locations) {
+                  if (area.includes(loc.name.toLowerCase())) {
+                    filteredCanada.push({
+                      id: props.id || props.identifier || props.title,
+                      event: props.event || props.type || props.title,
+                      severity: props.severity || props.urgency || props.certainty,
+                      areaDesc: props.areaDesc || props.area || props.title,
+                      headline: props.headline || props.description || props.title,
+                      locationName: loc.name,
+                      title: props.title,
+                      description: props.description
+                    });
+                    break;
+                  }
+                }
+              }
+            }
+            await ipcRenderer.invoke('archive-noaa', filteredNoaa);
+            await ipcRenderer.invoke('archive-canada', filteredCanada);
+            await ipcRenderer.invoke('archive-noaa-dashboard', dashboard ? [dashboard] : []);
+            await ipcRenderer.invoke('store-records', {
+              source: 'NOAA',
+              category: 'weather_alert',
+              isForecast: false,
+              records: filteredNoaa.map((item) => ({
+                eventTime: null,
+                title: item.event,
+                severity: item.severity,
+                locationName: item.locationName,
+                ...item
+              }))
+            });
+            await ipcRenderer.invoke('store-records', {
+              source: 'Environment Canada',
+              category: 'weather_alert',
+              isForecast: false,
+              records: filteredCanada.map((item) => ({
+                eventTime: null,
+                title: item.event || item.title,
+                severity: item.severity,
+                locationName: item.locationName,
+                ...item
+              }))
+            });
+            await maybeTriggerCriticalPopup(filteredNoaa, [], includeCanada ? filteredCanada : []);
+            await renderArchiveSummary();
+            renderNoaaDashboard(dashboard);
+            renderNoaa(filteredNoaa);
+            renderCanadaAlerts(filteredCanada);
+            touchDataLastUpdated();
+          } catch (error) {
+            alert('Weather refresh failed: ' + error.message);
+          }
+          });
+        }
+
+
+        async function refreshWeather() {
+          if (!config.isConfigured || !config.locations.length) {
+            alert('Setup must be completed before data can be retrieved.');
+            return;
+          }
+          await withGuestLiveBundle(async () => {
+          try {
+            const box = getBoundingBox(config.locations, config.radiusMiles || 150);
+            const usgs = await ipcRenderer.invoke('fetch-usgs-events', box);
+            const tsunamis = await ipcRenderer.invoke('fetch-tsunami-bulletins');
+            const radiusMilesForQuakes = Number(config.radiusMiles || 150);
+            const coarseQuakeRadius = Math.max(radiusMilesForQuakes, 200);
+            const filteredUsgs = [];
+            for (const feature of usgs.features || []) {
+              const coords = (feature.geometry && feature.geometry.coordinates) || [];
+              const lon = Number(coords[0]);
+              const lat = Number(coords[1]);
+              if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+              let nearest = null;
+              for (const loc of config.locations) {
+                const dist = milesBetween(loc.latitude, loc.longitude, lat, lon);
+                if (!nearest || dist < nearest.distance) {
+                  nearest = { locationName: loc.name, distance: dist };
+                }
+              }
+              if (nearest && nearest.distance <= coarseQuakeRadius) {
+                const timeMs = Number(feature.properties && feature.properties.time) || 0;
+                filteredUsgs.push({
+                  id: feature.id,
+                  magnitude: feature.properties && feature.properties.mag,
+                  place: feature.properties && feature.properties.place,
+                  time: new Date(timeMs).toLocaleString(),
+                  timeMs,
+                  distanceMiles: nearest.distance.toFixed(1),
+                  locationName: nearest.locationName,
+                  latitude: lat,
+                  longitude: lon,
+                  detailUrl: feature.properties && feature.properties.url,
+                  alertLevel: feature.properties && feature.properties.alert,
+                  status: feature.properties && feature.properties.status,
+                  depthKm: Number.isFinite(Number(coords[2])) ? Number(coords[2]).toFixed(1) : ''
+                });
+              }
+            }
+            const radiusFiltered = filteredUsgs
+              .filter((item) => Number(item.distanceMiles) <= radiusMilesForQuakes)
+              .sort((a, b) => (Number(b.timeMs) || 0) - (Number(a.timeMs) || 0));
+            await ipcRenderer.invoke('archive-usgs', radiusFiltered);
+            await ipcRenderer.invoke('archive-tsunamis', tsunamis.entries || []);
+            await ipcRenderer.invoke('store-records', {
+              source: 'USGS',
+              category: 'earthquake',
+              isForecast: false,
+              records: radiusFiltered.map((item) => ({
+                eventTime: item.time,
+                title: item.place,
+                severity: item.magnitude,
+                locationName: item.locationName,
+                ...item
+              }))
+            });
+            await ipcRenderer.invoke('store-records', {
+              source: 'Tsunami Warning Centers',
+              category: 'tsunami',
+              isForecast: false,
+              records: (tsunamis.entries || []).map((entry) => ({
+                eventTime: entry.updated || entry.published || null,
+                title: entry.title,
+                severity: null,
+                locationName: null,
+                ...entry
+              }))
+            });
+            await maybeTriggerCriticalPopup([], radiusFiltered, []);
+            await renderArchiveSummary();
+            renderUsgs(radiusFiltered);
+            renderTsunamis(tsunamis.entries || []);
+            touchDataLastUpdated();
+          } catch (error) {
+            const msg = String((error && error.message) || error);
+            if (/400/.test(msg) && /USGS|Tsunami bulletin request failed/i.test(msg)) return;
+            alert('Earthquake/Tsunami refresh failed: ' + error.message);
+          }
+          });
+        }
+
+        async function refreshCyclones() {
+          if (!config.isConfigured || !config.locations.length) return;
+          await withGuestLiveBundle(async () => {
+          try {
+            const data = await ipcRenderer.invoke('fetch-cyclones');
+            const items = Array.isArray(data.items) ? data.items : [];
+            await ipcRenderer.invoke('archive-cyclones', items);
+            await ipcRenderer.invoke('store-records', {
+              source: 'NASA EONET',
+              category: 'cyclone',
+              isForecast: false,
+              records: items.map((item) => ({
+                eventTime: item.geometryDate || null,
+                title: item.title,
+                severity: null,
+                locationName: null,
+                ...item
+              }))
+            });
+            renderCyclones(items);
+            await renderArchiveSummary();
+            touchDataLastUpdated();
+          } catch (error) {
+            alert('Cyclone refresh failed: ' + error.message);
+          }
+          });
+        }
+
+        async function refreshWildfires() {
+          if (!config.isConfigured || !config.locations.length) return;
+          await withGuestLiveBundle(async () => {
+          try {
+            const data = await ipcRenderer.invoke('fetch-wildfires');
+            const items = Array.isArray(data.items) ? data.items : [];
+            await ipcRenderer.invoke('archive-wildfires', items);
+            await ipcRenderer.invoke('store-records', {
+              source: 'NASA EONET',
+              category: 'wildfire',
+              isForecast: false,
+              records: items.map((item) => ({
+                eventTime: item.geometryDate || null,
+                title: item.title,
+                severity: null,
+                locationName: null,
+                ...item
+              }))
+            });
+            renderWildfires(items);
+            await renderArchiveSummary();
+            touchDataLastUpdated();
+          } catch (error) {
+            alert('Wildfire refresh failed: ' + error.message);
+          }
+          });
+        }
+
+        async function refreshData() {
+          await withGuestLiveBundle(() =>
+            Promise.all([refreshNoaa(), refreshWeather(), refreshCyclones(), refreshWildfires(), refreshForecasts()])
+          );
+        }
+
+        async function refreshForecasts() {
+          if (!config.isConfigured || !config.locations.length) return;
+          await withGuestLiveBundle(async () => {
+          try {
+            try {
+              await ipcRenderer.invoke('weather-guest-begin-live-data-burst');
+            } catch (burstErr) {
+              alert('Forecast refresh failed: ' + (burstErr && burstErr.message ? burstErr.message : String(burstErr)));
+              return;
+            }
+            const allForecasts = [];
+            for (const loc of config.locations) {
+              const data = await ipcRenderer.invoke('fetch-noaa-forecast', {
+                latitude: loc.latitude,
+                longitude: loc.longitude
+              });
+              const periods = data && data.properties && Array.isArray(data.properties.periods)
+                ? data.properties.periods
+                : [];
+              const now = new Date();
+              const future = periods
+                .filter((period) => period && period.startTime && new Date(period.startTime) > now)
+                .map((period) => ({ ...period, locationName: loc.name }));
+              allForecasts.push(...future);
+            }
+            await ipcRenderer.invoke('archive-forecasts', allForecasts);
+            await ipcRenderer.invoke('store-records', {
+              source: 'NOAA',
+              category: 'forecast',
+              isForecast: true,
+              records: allForecasts.map((item) => ({
+                eventTime: item.startTime || null,
+                title: item.name,
+                severity: null,
+                locationName: item.locationName,
+                ...item
+              }))
+            });
+            renderForecasts(allForecasts);
+            await renderArchiveSummary();
+            touchDataLastUpdated();
+          } catch (error) {
+            alert('Forecast refresh failed: ' + error.message);
+          }
+          });
+        }
+
+        async function refreshAllDataFromSettings() {
+          if (!config.isConfigured || !config.locations.length) {
+            alert('Setup must be completed before data can be retrieved.');
+            return;
+          }
+          const btn = document.getElementById('settingsRefreshAllBtn');
+          if (btn) btn.disabled = true;
+          try {
+            await refreshData();
+          } finally {
+            if (btn) btn.disabled = !config.isConfigured;
+          }
+        }
+
+        async function quickRefreshUSGSOnly() {
+          if (guestLiveDataCapped) return;
+          if (!config.isConfigured || !config.locations.length) return;
+          await refreshWeather();
+        }
+
+        setInterval(() => {
+          void quickRefreshUSGSOnly();
+        }, 5 * 60 * 1000);
+
+        async function quickRefreshNonUSGS() {
+          if (guestLiveDataCapped) return;
+          if (!config.isConfigured || !config.locations.length) return;
+          await withGuestLiveBundle(() =>
+            Promise.all([refreshNoaa(), refreshCyclones(), refreshWildfires(), refreshForecasts()])
+          );
+        }
+
+        setInterval(() => {
+          void quickRefreshNonUSGS();
+        }, 30 * 60 * 1000);
+
+        if (typeof window !== 'undefined') {
+          try {
+            Object.assign(window, {
+              addLocation,
+              removeLocation,
+              completeSetup,
+              refreshNoaa,
+              refreshWeather,
+              refreshCyclones,
+              refreshWildfires,
+              refreshForecasts,
+              showPage,
+              toggleNavDrawer,
+              closeNavDrawer,
+              toggleOpenAtLogin,
+              openRootRecordWebsite,
+              emailRootRecordSupport,
+              openDiscordSupport,
+              authSignIn,
+              authSignUp,
+              authContinueWithoutAccount,
+              startCheckout,
+              onUnitSystemChanged,
+              saveAlertSettings,
+              openLocationMapPicker,
+              closeLocationMapPicker,
+              applyPickedLocation,
+              openDashboardDetail,
+              closeDashboardDetail,
+              openEventDetail,
+              openExternalUrl,
+              previewSelectedAlertSound,
+              refreshBackupPanel,
+              saveBackupSettings,
+              backupDatabaseNow,
+              openBackupFolder,
+              humanizeLicenseGateError,
+              authLogout,
+              refreshAllDataFromSettings
+            });
+          } catch (error) {
+            setAuthStatus('error', 'UI initialization failed: ' + (error && error.message ? error.message : String(error)));
+          }
+        }
+
+        (function bindAuthGateControls() {
+          console.log('[rrwm] binding auth gate controls');
+          function dispatch(id) {
+            console.log('[rrwm] auth click:', id);
+            try {
+              if (id === 'authSignInBtn') return void authSignIn();
+              if (id === 'authSignUpBtn') return void authSignUp();
+              if (id === 'authContinueLocalBtn') return void authContinueWithoutAccount();
+              if (id === 'authSubscribeBtn') return void startCheckout();
+              if (id === 'authOpenWebsiteBtn') return void openRootRecordWebsite();
+            } catch (e) {
+              console.error('[rrwm] auth handler threw', e);
+              setAuthStatus('error', 'Auth handler error: ' + (e && e.message ? e.message : String(e)));
+            }
+          }
+          const ids = ['authSignInBtn', 'authSignUpBtn', 'authContinueLocalBtn', 'authSubscribeBtn', 'authOpenWebsiteBtn'];
+          for (let i = 0; i < ids.length; i += 1) {
+            const id = ids[i];
+            const el = document.getElementById(id);
+            if (!el) {
+              console.warn('[rrwm] missing element', id);
+              continue;
+            }
+            el.onclick = function (ev) {
+              if (ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+              }
+              dispatch(id);
+            };
+          }
+          document.addEventListener(
+            'click',
+            function (ev) {
+              const t = ev && ev.target;
+              if (!t || typeof t.closest !== 'function') return;
+              const btn = t.closest('button');
+              if (!btn) return;
+              if (ids.indexOf(btn.id) === -1) return;
+              ev.preventDefault();
+              ev.stopPropagation();
+              dispatch(btn.id);
+            },
+            true
+          );
+          const pwd = document.getElementById('authPassword');
+          if (pwd) {
+            pwd.addEventListener('keydown', function (ev) {
+              if (ev.key === 'Enter') {
+                ev.preventDefault();
+                dispatch('authSignInBtn');
+              }
+            });
+          }
+        })();
+
+        wireHtmlOnclickAttributes(document);
+        void initializeAuthGate();
+      </script>
+    </body>
+    </html>
+  

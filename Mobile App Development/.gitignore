@@ -1,0 +1,5 @@
+node_modules/
+.pnpm-debug.log
+
+# Nested clone with its own .git; track it in that repository, not here.
+rr-weather-manager-mobile/

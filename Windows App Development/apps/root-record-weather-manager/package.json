@@ -1,0 +1,14 @@
+{
+  "name": "root-record-weather-manager",
+  "version": "1.0.18",
+  "private": true,
+  "description": "Windows workspace for Root Record Weather Manager (repackaged app + NSIS installer build).",
+  "scripts": {
+    "repack:asar": "node scripts/repack-asar.cjs",
+    "build:installer": "npm run repack:asar && electron-builder --win nsis --x64 --prepackaged app"
+  },
+  "devDependencies": {
+    "@electron/asar": "^3.2.18",
+    "electron-builder": "^24.13.3"
+  }
+}

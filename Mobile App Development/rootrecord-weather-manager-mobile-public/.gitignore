@@ -1,0 +1,10 @@
+# Local clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Never commit signed builds here (attach to GitHub Releases instead)
+*.apk
+*.aab
+*.keystore
+*.jks

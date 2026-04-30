@@ -1,0 +1,3 @@
+packages:
+  - "rr-weather-manager-mobile/frontend"
+  - "apps/*"

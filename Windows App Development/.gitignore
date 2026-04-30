@@ -1,0 +1,47 @@
+# Local-only extraction helpers (7-Zip / innoextract downloads)
+tools/
+
+# Dependencies
+node_modules/
+
+# Build / packager output
+dist/
+out/
+release/
+build-output/
+*.asar
+
+# Logs & debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# OS & editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Env & secrets (never commit)
+.env
+.env.*
+!.env.example
+
+# Windows / Electron
+*.stackdump
+.cache/
+
+# Certificates & signing (keep local only)
+*.pfx
+*.p12
+
+# Coverage & test artifacts
+coverage/
+.nyc_output/

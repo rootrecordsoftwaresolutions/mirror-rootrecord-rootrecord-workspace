@@ -1,0 +1,22 @@
+---
+description: Never strip or blank .env / secrets files; surgical edits only
+alwaysApply: true
+---
+
+# Environment and secrets files (hard requirement)
+
+Applies to `**/.env`, `**/.env.*`, `credentials.env`, `.dev.vars`, and any file whose primary job is holding `KEY=value` secrets or local config.
+
+## Do not
+
+- Remove, blank out, or “reset” existing keys or values unless the user **explicitly** asked to delete or replace **that exact key** (or named lines).
+- Replace a whole block with a template that has empty values when the user may have filled values.
+- Widen a `search_replace` old_string in a way that drops lines the user did not ask to change.
+
+## Do
+
+- **Surgical edits only**: change the smallest span needed; leave every other line and value untouched.
+- If unsure whether a patch would clobber existing values, **stop** and ask, or have the user paste the exact final lines for that section.
+- Prefer **append-only** additions at the end of the file when adding new keys, unless the user asked to insert in a specific place.
+
+Treating the user’s time as disposable (e.g. forcing them to re-paste secrets) is a failure mode to avoid.

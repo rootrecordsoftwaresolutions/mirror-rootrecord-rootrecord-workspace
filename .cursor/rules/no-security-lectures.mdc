@@ -1,0 +1,10 @@
+---
+description: No unsolicited security lecturing; user accepts local credential storage
+alwaysApply: true
+---
+
+# Security and credentials
+
+- Do **not** give unsolicited security lectures (rotation sermons, “never commit secrets,” preaching about keys in `.env` / `credentials.env`, etc.). The maintainer is aware and chooses to keep material local for velocity.
+- Only discuss security **when the user explicitly asks** for a security review, threat model, or hardening work.
+- Treat workspace credentials and env files as **normal project context**; do not scold or derail tasks to warn about them.

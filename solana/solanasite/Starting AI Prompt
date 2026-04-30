@@ -1,0 +1,95 @@
+You are an expert full-stack Next.js 14+ (App Router) engineer specializing in Solana dApps. Build a complete, production-ready web app called "RootRecord Solana Tools" that will live at solana.rootrecord.info.
+
+This app is a fast, cheap, user-first Solana SPL token creator and management suite that undercuts every competitor (Orion, CoinFactory, Solmint, 20lab, Slerf.tools) by charging roughly half price while delivering a cleaner, more trustworthy experience.
+
+### BRAND & DESIGN (MUST MATCH rootrecord.info 1:1 aesthetic)
+- Replicate the clean, minimalist, professional, "local-first / user-first" design language of https://rootrecord.info exactly.
+- Hero banner style: large bold heading + tagline with italic emphasis on key words (e.g. *your SOL*, *your time*, *your tokens*).
+- Numbered sections (01 /, 02 / etc.) and clean card-based feature breakdowns.
+- Ample whitespace, sans-serif typography (system or Inter), subtle shadows, smooth hover states.
+- Dark mode by default (crypto-native) with soft teal/blue Solana-inspired accents (#14F195 green and #9945FF purple as secondary accents) on a deep charcoal/dark navy background.
+- Overall vibe: trustworthy, no-BS, "software that respects your data, your time, and your work" → translate to "on-chain tools that respect your SOL, your time, and your memecoins".
+- Navigation: simple top bar with logo (RootRecord wordmark), "Create Token", "Tools", "Pricing", "Docs", and prominent "Connect Wallet" button (use @solana/wallet-adapter).
+- Footer: Privacy, Terms, GitHub link, made with respect for users.
+- Every page must feel like a natural extension of rootrecord.info.
+
+### TECH STACK (exact versions & setup)
+- Next.js 14+ App Router + TypeScript + Tailwind CSS + shadcn/ui (all latest)
+- Solana: @solana/web3.js, @solana/spl-token, @metaplex-foundation/mpl-token-metadata (v3), @solana/wallet-adapter-react + all major wallets (Phantom, Solflare, Backpack, etc.)
+- IPFS metadata: nft.storage (free tier) or Pinata — include a placeholder env var for API key
+- RPC: configurable via env (default Helius or QuickNode dev endpoint)
+- State: React hooks only (no Redux)
+- Forms: React Hook Form + Zod validation
+- UI components: shadcn/ui (Card, Button, Input, Label, Dialog, Toast, etc.) — use their exact styling
+- Deployment ready for Vercel (include vercel.json if needed)
+
+### CORE PAGES & FEATURES (build all of these)
+
+1. **Landing Page (/)**
+   - Hero: "RootRecord Solana Tools" + tagline "Fast, cheap, on-chain token creation that actually respects your SOL."
+   - Trust bar: "0.025 SOL create • Real on-chain cost ≈ 0.01 SOL • No hidden fees"
+   - Feature cards (numbered like rootrecord.info): Create Token, Revoke Authorities, Mint More, Update Metadata, etc.
+   - Competitor comparison table (light roast on the high fees)
+   - "Launch in 60 seconds" CTA button that scrolls to /create
+   - Testimonials / recent tokens created (fake for MVP)
+
+2. **Token Creator (/create) — the money-maker**
+   - Clean form with shadcn inputs:
+     - Token Name
+     - Symbol (max 10 chars)
+     - Decimals (default 9)
+     - Total Supply (with comma formatting)
+     - Description (textarea)
+     - Logo upload (drag & drop, preview, auto-upload to IPFS)
+     - Optional: website, Twitter, Telegram fields for metadata
+   - One-click "Create Token" button (0.025 SOL fee)
+   - Wallet must be connected first (big prominent button)
+   - Real on-chain flow (exact code pattern I want):
+     - Generate new mint Keypair
+     - Create mint account + initialize mint
+     - Create Metaplex metadata account (v3) with IPFS URI
+     - Add SystemProgram.transfer for the 0.025 SOL fee to YOUR_FEE_WALLET (placeholder env var)
+     - All in a single atomic transaction (or minimal txs)
+     - Use wallet adapter to sign & send
+   - Loading state with transaction simulation + confirmation
+   - Success modal/dialog:
+     - Mint address (copyable)
+     - Solscan explorer link
+     - "Revoke Mint Authority" and "Revoke Freeze Authority" one-click buttons (separate txs, 0.01 SOL each)
+     - "Mint additional tokens" quick action
+     - Share on X button with pre-filled tweet
+
+3. **Additional Tools Page (/tools)**
+   - Cards for:
+     - Revoke Mint Authority (standalone)
+     - Revoke Freeze Authority
+     - Mint more tokens
+     - Update metadata
+   - Each opens a modal with the same clean form style
+
+4. **Pricing / Transparency Page (/pricing)**
+   - Table showing our fees vs competitors + real on-chain cost
+   - "Lifetime" style note: pay once per action, no subscriptions (yet)
+
+### MONETIZATION (built-in & non-negotiable)
+- Every create/revoke/mint action automatically includes a transfer instruction for the fee.
+- Fee wallet = process.env.NEXT_PUBLIC_FEE_WALLET (you will fill this later)
+- Create fee = 0.025 SOL
+- Revoke or mint fee = 0.01 SOL each
+- Referral system stub (optional but nice): ?ref=wallet → track and give 30% back later
+
+### TECHNICAL REQUIREMENTS
+- Full TypeScript, no any types
+- Proper error handling and toast notifications (sonner or shadcn toast)
+- Responsive (mobile-first)
+- SEO: proper meta tags, Open Graph, title "RootRecord Solana Tools | Cheapest Token Creator on Solana"
+- Env variables documented in .env.example
+- Include a README.md with setup instructions
+- All Solana interactions client-side only (never expose keys)
+- Use latest 2026 Solana best practices (Token-2022 ready for future extension)
+
+Start by generating the complete project structure with all files. Then output the full code for every file (app/layout.tsx, app/page.tsx, app/create/page.tsx, components, lib/solana.ts, etc.). Make it copy-paste ready so I can run npm install && npm run dev immediately.
+
+This must feel like a premium extension of rootrecord.info — calm, professional, and built with the same respect for the user's time and money.
+
+Begin now.
